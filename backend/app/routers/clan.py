@@ -27,7 +27,7 @@ router = APIRouter(prefix="/api/v1", tags=["Clan"])
 CACHE_TTL = timedelta(minutes=10)
 
 # Supercell API base
-SUPERCELL_BASE_URL = "https://api.clashofclans.com/v1"
+SUPERCELL_BASE_URL = "https://cocproxy.royaleapi.dev/v1"
 
 
 # ──────────────────────────────────────────────────────────────
