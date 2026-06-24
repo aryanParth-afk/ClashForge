@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Castle,
   Loader2,
@@ -33,6 +33,13 @@ interface ParsedResult {
   spells: ParsedItem[];
   total_buildings: number;
   busy_builders: number;
+}
+
+interface DynamicMetadata {
+  buildings?: Record<number, string>;
+  troops?: Record<number, string>;
+  spells?: Record<number, string>;
+  heroes?: Record<number, string>;
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -80,10 +87,17 @@ const BUILDING_ID_MAP: Record<number, string> = {
   1000029: "Workshop",
   1000030: "Pet House",
   1000031: "Scattershot",
+  1000033: "Pet House / Builder's Hut", // Usually TH14 addition
   1000034: "Clan Castle",
   1000035: "Seeking Air Mine",
   1000036: "Tornado Trap",
   1000037: "Royal Champion Altar",
+  1000038: "Spell Tower",
+  1000039: "Monolith",
+  1000044: "Multi-Archer Tower",
+  1000045: "Ricochet Cannon",
+  1000046: "Firespitter / Defense",
+  1000070: "Blacksmith",
 
   // ── Layout-export IDs (12000xxx) ──
   12000000: "Town Hall",
@@ -217,13 +231,20 @@ const SPELL_ID_MAP: Record<number, string> = {
   26000013: "Overgrowth Spell",
 };
 
-function resolveItem(dataId: number): { name: string; category: ParsedItem["category"] } {
+function resolveItem(dataId: number, dynamicMetadata?: DynamicMetadata): { name: string; category: ParsedItem["category"] } {
+  // 1. Check dynamic metadata first (ensures we get the latest game updates)
+  if (dynamicMetadata?.buildings?.[dataId]) return { name: dynamicMetadata.buildings[dataId], category: "building" };
+  if (dynamicMetadata?.troops?.[dataId]) return { name: dynamicMetadata.troops[dataId], category: "troop" };
+  if (dynamicMetadata?.heroes?.[dataId]) return { name: dynamicMetadata.heroes[dataId], category: "hero" };
+  if (dynamicMetadata?.spells?.[dataId]) return { name: dynamicMetadata.spells[dataId], category: "spell" };
+
+  // 2. Fallback to hardcoded mapping
   if (BUILDING_ID_MAP[dataId]) return { name: BUILDING_ID_MAP[dataId], category: "building" };
   if (TROOP_ID_MAP[dataId]) return { name: TROOP_ID_MAP[dataId], category: "troop" };
   if (HERO_ID_MAP[dataId]) return { name: HERO_ID_MAP[dataId], category: "hero" };
   if (SPELL_ID_MAP[dataId]) return { name: SPELL_ID_MAP[dataId], category: "spell" };
 
-  // Guess category by ID range
+  // 3. Guess category by ID range if totally unknown
   if (dataId >= 12000000 && dataId < 13000000) return { name: `Building (${dataId})`, category: "building" };
   if (dataId >= 1000000 && dataId < 2000000) return { name: `Building (${dataId})`, category: "building" };
   if (dataId >= 4000000 && dataId < 5000000) return { name: `Troop (${dataId})`, category: "troop" };
@@ -246,7 +267,7 @@ interface RawEntry {
   category: ParsedItem["category"];
 }
 
-function extractEntries(data: unknown, hintCategory?: ParsedItem["category"]): RawEntry[] {
+function extractEntries(data: unknown, hintCategory?: ParsedItem["category"], dynamicMetadata?: DynamicMetadata): RawEntry[] {
   if (Array.isArray(data)) {
     const entries = data
       .filter((item): item is Record<string, unknown> => typeof item === "object" && item !== null)
@@ -258,7 +279,7 @@ function extractEntries(data: unknown, hintCategory?: ParsedItem["category"]): R
       })
       .map((item) => {
         const dataId = Number(item.data ?? item.dataId ?? item.data_id ?? item.id ?? 0);
-        const resolved = resolveItem(dataId);
+        const resolved = resolveItem(dataId, dynamicMetadata);
         return {
           dataId,
           lvl: Number(item.lvl ?? item.level ?? item.lv ?? 0),
@@ -282,7 +303,7 @@ function extractEntries(data: unknown, hintCategory?: ParsedItem["category"]): R
   return [];
 }
 
-function parseVillageData(raw: unknown): ParsedResult {
+function parseVillageData(raw: unknown, dynamicMetadata?: DynamicMetadata): ParsedResult {
   const allEntries: RawEntry[] = [];
 
   if (typeof raw !== "object" || raw === null) {
@@ -303,14 +324,14 @@ function parseVillageData(raw: unknown): ParsedResult {
   for (const [keys, category] of sectionMapping) {
     for (const key of keys) {
       if (key in obj && Array.isArray(obj[key])) {
-        allEntries.push(...extractEntries(obj[key], category));
+        allEntries.push(...extractEntries(obj[key], category, dynamicMetadata));
       }
     }
   }
 
   // ── Strategy 2: Top-level array (just an array of items) ──
   if (allEntries.length === 0 && Array.isArray(raw)) {
-    allEntries.push(...extractEntries(raw));
+    allEntries.push(...extractEntries(raw, undefined, dynamicMetadata));
   }
 
   // ── Strategy 3: Recurse into any unknown key ──
@@ -319,7 +340,7 @@ function parseVillageData(raw: unknown): ParsedResult {
       if (["obstacles", "obstacles2", "decos", "decos2", "skins", "skins2", "sceneries", "sceneries2", "boosts", "boosts2"].includes(key)) {
         continue; // skip non-building data
       }
-      const entries = extractEntries(obj[key]);
+      const entries = extractEntries(obj[key], undefined, dynamicMetadata);
       allEntries.push(...entries);
     }
   }
@@ -340,7 +361,7 @@ function parseVillageData(raw: unknown): ParsedResult {
   let busyBuilders = 0;
 
   for (const entry of allEntries) {
-    const resolved = resolveItem(entry.dataId);
+    const resolved = resolveItem(entry.dataId, dynamicMetadata);
     const item: ParsedItem = {
       data_id: entry.dataId,
       name: resolved.name,
@@ -431,6 +452,21 @@ export default function VillagePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"buildings" | "troops" | "heroes" | "spells">("buildings");
+  
+  // State for dynamically fetched CoC metadata
+  const [dynamicMetadata, setDynamicMetadata] = useState<DynamicMetadata | undefined>(undefined);
+  
+  useEffect(() => {
+    // Fetch latest CoC mappings in background
+    fetch("/api/coc-metadata")
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) {
+          setDynamicMetadata(data);
+        }
+      })
+      .catch(err => console.error("Failed to fetch dynamic CoC metadata", err));
+  }, []);
 
   function handleSubmit() {
     setError(null);
@@ -447,7 +483,7 @@ export default function VillagePage() {
     setLoading(true);
 
     try {
-      const data = parseVillageData(parsed);
+      const data = parseVillageData(parsed, dynamicMetadata);
       setResult(data);
       // Auto-select first non-empty tab
       if (data.buildings.length > 0) setActiveTab("buildings");
