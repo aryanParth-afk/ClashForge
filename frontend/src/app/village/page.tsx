@@ -22,7 +22,151 @@ interface BuildingData {
 interface ParsedResult {
   total_buildings: number;
   busy_builders: number;
+  town_hall_level: number | null;
   buildings: BuildingData[];
+}
+
+/* ── Data-ID → Human-Readable Name Mapping ── */
+const DATA_ID_MAP: Record<number, string> = {
+  // Resource & Core
+  1000001: "Town Hall",
+  1000000: "Elixir Collector",
+  1000002: "Elixir Storage",
+  1000003: "Gold Mine",
+  1000004: "Gold Storage",
+  1000014: "Army Camp",
+  1000015: "Barracks",
+  1000013: "Laboratory",
+  1000007: "Builder's Hut",
+  1000023: "Spell Factory",
+  1000024: "Dark Spell Factory",
+  1000025: "Dark Barracks",
+  1000029: "Workshop",
+  1000030: "Pet House",
+  1000034: "Clan Castle",
+
+  // Defenses
+  1000005: "Wall",
+  1000006: "Bomb",
+  1000008: "Cannon",
+  1000009: "Archer Tower",
+  1000010: "Mortar",
+  1000011: "Air Defense",
+  1000012: "Wizard Tower",
+  1000019: "Hidden Tesla",
+  1000020: "X-Bow",
+  1000021: "Inferno Tower",
+  1000022: "Eagle Artillery",
+  1000031: "Scattershot",
+  1000032: "Giga Tesla",
+  1000033: "Giga Inferno",
+
+  // Traps
+  1000016: "Spring Trap",
+  1000017: "Air Bomb",
+  1000018: "Giant Bomb",
+  1000035: "Seeking Air Mine",
+  1000036: "Tornado Trap",
+
+  // Heroes
+  1000026: "Barbarian King Altar",
+  1000027: "Archer Queen Altar",
+  1000028: "Grand Warden Altar",
+  1000037: "Royal Champion Altar",
+};
+
+function resolveName(dataId: number): string {
+  return DATA_ID_MAP[dataId] ?? `Unknown (${dataId})`;
+}
+
+/* ── Flexible JSON Parser ──
+   Handles multiple formats:
+   1. { "buildings": [{ "dataId": ..., "lvl": ... }] }
+   2. Array of buildings directly: [{ "dataId": ..., "lvl": ... }]
+   3. Nested in any key that contains building-like objects
+   4. Objects with "data_id"/"id" instead of "dataId"
+   5. Objects with "level" instead of "lvl"
+*/
+function extractBuildings(data: unknown): { dataId: number; lvl: number; timer: number }[] {
+  // If it's an array, check if items look like buildings
+  if (Array.isArray(data)) {
+    const buildings = data
+      .filter((item): item is Record<string, unknown> => typeof item === "object" && item !== null)
+      .filter((item) => {
+        const hasId = "dataId" in item || "data_id" in item || "id" in item;
+        const hasLevel = "lvl" in item || "level" in item || "lv" in item;
+        return hasId && hasLevel;
+      })
+      .map((item) => ({
+        dataId: Number(item.dataId ?? item.data_id ?? item.id ?? 0),
+        lvl: Number(item.lvl ?? item.level ?? item.lv ?? 0),
+        timer: Number(item.timer ?? item.remaining ?? item.upgradeTime ?? 0),
+      }));
+
+    if (buildings.length > 0) return buildings;
+  }
+
+  // If it's an object, search known keys or recurse
+  if (typeof data === "object" && data !== null && !Array.isArray(data)) {
+    const obj = data as Record<string, unknown>;
+
+    // Check common keys first
+    const priorityKeys = ["buildings", "building_data", "buildingData", "village", "layout"];
+    for (const key of priorityKeys) {
+      if (key in obj) {
+        const result = extractBuildings(obj[key]);
+        if (result.length > 0) return result;
+      }
+    }
+
+    // Fallback: search all keys
+    for (const key of Object.keys(obj)) {
+      if (priorityKeys.includes(key)) continue; // already checked
+      const result = extractBuildings(obj[key]);
+      if (result.length > 0) return result;
+    }
+  }
+
+  return [];
+}
+
+function parseVillageClientSide(raw: unknown): ParsedResult {
+  const buildings = extractBuildings(raw);
+
+  if (buildings.length === 0) {
+    throw new Error(
+      "Could not find building data in the JSON. Expected an array of objects with " +
+      "\"dataId\" (or \"data_id\") and \"lvl\" (or \"level\") fields. " +
+      "Try pasting the sample to see the expected format."
+    );
+  }
+
+  let busyBuilders = 0;
+  let townHallLevel: number | null = null;
+
+  const buildingsSummary: BuildingData[] = buildings.map((b) => {
+    const isUpgrading = (b.timer ?? 0) > 0;
+    if (isUpgrading) busyBuilders++;
+
+    // Detect Town Hall level
+    if (b.dataId === 1000001) {
+      townHallLevel = b.lvl;
+    }
+
+    return {
+      data_id: b.dataId,
+      name: resolveName(b.dataId),
+      level: b.lvl,
+      upgrading: isUpgrading,
+    };
+  });
+
+  return {
+    total_buildings: buildingsSummary.length,
+    busy_builders: busyBuilders,
+    town_hall_level: townHallLevel,
+    buildings: buildingsSummary,
+  };
 }
 
 /* ── Sample JSON for the placeholder ── */
@@ -34,6 +178,12 @@ const SAMPLE_JSON = JSON.stringify(
       { dataId: 1000009, lvl: 14, timer: 0 },
       { dataId: 1000010, lvl: 10, timer: 7200 },
       { dataId: 1000019, lvl: 9, timer: 0 },
+      { dataId: 1000011, lvl: 10, timer: 0 },
+      { dataId: 1000012, lvl: 11, timer: 0 },
+      { dataId: 1000020, lvl: 5, timer: 0 },
+      { dataId: 1000021, lvl: 4, timer: 14400 },
+      { dataId: 1000026, lvl: 50, timer: 0 },
+      { dataId: 1000027, lvl: 45, timer: 0 },
     ],
   },
   null,
@@ -46,12 +196,12 @@ export default function VillagePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit() {
+  function handleSubmit() {
     setError(null);
     setResult(null);
 
     /* ── Validate JSON locally first ── */
-    let parsed: object;
+    let parsed: unknown;
     try {
       parsed = JSON.parse(jsonInput);
     } catch {
@@ -62,21 +212,8 @@ export default function VillagePage() {
     setLoading(true);
 
     try {
-      const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-      const res = await fetch(`${API}/api/v1/parse-village`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(parsed),
-      });
-
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        throw new Error(
-          body?.detail ?? `Server returned ${res.status}`
-        );
-      }
-
-      const data: ParsedResult = await res.json();
+      /* Parse entirely client-side — instant, no network needed */
+      const data = parseVillageClientSide(parsed);
       setResult(data);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -102,7 +239,7 @@ export default function VillagePage() {
       </div>
       <p className="text-muted-foreground mb-8">
         Paste your village export JSON to decode building IDs, levels, and
-        builder status.
+        builder status. Parsing happens <strong>instantly</strong> in your browser.
       </p>
 
       {/* ── Input Card ── */}
@@ -165,7 +302,14 @@ export default function VillagePage() {
       {result && (
         <div className="space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500" id="village-results">
           {/* Summary row */}
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {result.town_hall_level !== null && (
+              <SummaryCard
+                label="Town Hall"
+                value={result.town_hall_level}
+                icon={<Castle className="h-4 w-4 text-chart-2" />}
+              />
+            )}
             <SummaryCard
               label="Total Buildings"
               value={result.total_buildings}
