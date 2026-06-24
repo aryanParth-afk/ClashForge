@@ -62,7 +62,8 @@ export default function VillagePage() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8000/api/v1/parse-village", {
+      const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+      const res = await fetch(`${API}/api/v1/parse-village`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(parsed),

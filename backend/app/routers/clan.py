@@ -23,8 +23,8 @@ from app.database import get_db
 
 router = APIRouter(prefix="/api/v1", tags=["Clan"])
 
-# Cache time-to-live: 10 minutes (TRD §2 – Rate Limiting & Caching)
-CACHE_TTL = timedelta(minutes=10)
+# Cache time-to-live: 1 minute for near real-time data
+CACHE_TTL = timedelta(minutes=1)
 
 # Supercell API base
 SUPERCELL_BASE_URL = "https://cocproxy.royaleapi.dev/v1"

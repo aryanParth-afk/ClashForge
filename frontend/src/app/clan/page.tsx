@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Users,
   Search,
@@ -9,12 +9,16 @@ import {
   Shield,
   Trophy,
   Swords,
-  Database,
-  Wifi,
   Crown,
   Medal,
   RefreshCw,
+  Circle,
+  Clock,
 } from "lucide-react";
+
+/* ── Constants ── */
+const AUTO_REFRESH_INTERVAL = 30_000; // 30 seconds
+const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 /* ── Types ── */
 interface ClanMember {
@@ -61,26 +65,35 @@ function getRoleConfig(role: string) {
   return ROLE_CONFIG[role] ?? ROLE_CONFIG.member;
 }
 
+function formatTime(date: Date): string {
+  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
 export default function ClanPage() {
   const [tagInput, setTagInput] = useState("");
+  const [activeTag, setActiveTag] = useState<string | null>(null);
   const [result, setResult] = useState<ClanResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [secondsUntilRefresh, setSecondsUntilRefresh] = useState(AUTO_REFRESH_INTERVAL / 1000);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  async function handleSearch(forceRefresh = false) {
-    const tag = tagInput.trim();
-    if (!tag) return;
-
-    setError(null);
-    setResult(null);
-    setLoading(true);
+  /* ── Fetch clan data — always force_refresh for real-time ── */
+  const fetchClan = useCallback(async (tag: string, isBackground = false) => {
+    if (!isBackground) {
+      setError(null);
+      setLoading(true);
+    } else {
+      setRefreshing(true);
+    }
 
     try {
-      /* Strip leading # — the backend normalises it anyway */
-      const cleanTag = tag.replace(/^#/, "");
-      const qs = forceRefresh ? "?force_refresh=true" : "";
+      const cleanTag = tag.replace(/^#/, "").toUpperCase();
       const res = await fetch(
-        `http://localhost:8000/api/v1/clan/${encodeURIComponent(cleanTag)}${qs}`
+        `${API}/api/v1/clan/${encodeURIComponent(cleanTag)}?force_refresh=true`
       );
 
       if (!res.ok) {
@@ -90,15 +103,63 @@ export default function ClanPage() {
 
       const data: ClanResponse = await res.json();
       setResult(data);
+      setLastUpdated(new Date());
+      setSecondsUntilRefresh(AUTO_REFRESH_INTERVAL / 1000);
+      if (!isBackground) setError(null);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+      if (!isBackground) {
+        setError(err instanceof Error ? err.message : "Something went wrong.");
+      }
+      // On background refresh failure, keep existing data — don't clear it
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  }, []);
+
+  /* ── Start auto-refresh polling when we have an active tag ── */
+  useEffect(() => {
+    // Clear any existing intervals
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (countdownRef.current) clearInterval(countdownRef.current);
+
+    if (!activeTag) return;
+
+    // Auto-refresh every 30s
+    intervalRef.current = setInterval(() => {
+      fetchClan(activeTag, true);
+    }, AUTO_REFRESH_INTERVAL);
+
+    // Countdown timer (ticks every second)
+    countdownRef.current = setInterval(() => {
+      setSecondsUntilRefresh((prev) => (prev <= 1 ? AUTO_REFRESH_INTERVAL / 1000 : prev - 1));
+    }, 1000);
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (countdownRef.current) clearInterval(countdownRef.current);
+    };
+  }, [activeTag, fetchClan]);
+
+  /* ── Search handler ── */
+  async function handleSearch() {
+    const tag = tagInput.trim();
+    if (!tag) return;
+
+    setActiveTag(tag);
+    setSecondsUntilRefresh(AUTO_REFRESH_INTERVAL / 1000);
+    await fetchClan(tag);
+  }
+
+  /* ── Manual refresh ── */
+  async function handleManualRefresh() {
+    if (!activeTag) return;
+    setSecondsUntilRefresh(AUTO_REFRESH_INTERVAL / 1000);
+    await fetchClan(activeTag, true);
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "Enter") handleSearch(false);
+    if (e.key === "Enter") handleSearch();
   }
 
   const clan = result?.data;
@@ -113,7 +174,7 @@ export default function ClanPage() {
         <h1 className="text-2xl font-bold tracking-tight">Clan Inspector</h1>
       </div>
       <p className="text-muted-foreground mb-8">
-        Enter a clan tag to fetch live stats, member roster, and trophy data.
+        Enter a clan tag to fetch <strong>real-time</strong> stats. Data auto-refreshes every 30 seconds.
       </p>
 
       {/* ── Search Card ── */}
@@ -142,7 +203,7 @@ export default function ClanPage() {
           </div>
           <button
             type="button"
-            onClick={() => handleSearch(false)}
+            onClick={handleSearch}
             disabled={loading || !tagInput.trim()}
             id="btn-search-clan"
             className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed glow"
@@ -153,17 +214,6 @@ export default function ClanPage() {
               <Search className="h-4 w-4" />
             )}
             {loading ? "Searching…" : "Search"}
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSearch(true)}
-            disabled={loading || !tagInput.trim()}
-            id="btn-force-refresh"
-            className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Bypass cache and fetch fresh data"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-            <span className="hidden sm:inline">Force Refresh</span>
           </button>
         </div>
       </div>
@@ -185,6 +235,49 @@ export default function ClanPage() {
           className="space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
           id="clan-results"
         >
+          {/* ── Live status bar ── */}
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-background/50 px-4 py-2.5">
+            <div className="flex items-center gap-3">
+              {/* Pulsing live dot */}
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-chart-3 opacity-75" />
+                <Circle className="relative h-2.5 w-2.5 fill-chart-3 text-chart-3" />
+              </span>
+              <span className="text-xs font-medium text-chart-3">LIVE</span>
+
+              {refreshing && (
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <RefreshCw className="h-3 w-3 animate-spin" />
+                  Refreshing…
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-4">
+              {lastUpdated && (
+                <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  Updated {formatTime(lastUpdated)}
+                </span>
+              )}
+
+              <span className="text-xs text-muted-foreground/60 font-mono">
+                {secondsUntilRefresh}s
+              </span>
+
+              <button
+                type="button"
+                onClick={handleManualRefresh}
+                disabled={refreshing}
+                className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground hover:bg-accent disabled:opacity-50"
+                title="Refresh now"
+              >
+                <RefreshCw className={`h-3 w-3 ${refreshing ? "animate-spin" : ""}`} />
+                Refresh
+              </button>
+            </div>
+          </div>
+
           {/* ── Clan header card ── */}
           <div className="glass rounded-2xl p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -208,9 +301,6 @@ export default function ClanPage() {
                   </p>
                 </div>
               </div>
-
-              {/* Source badge */}
-              <SourceBadge source={result!.source} />
             </div>
 
             {clan.description && (
@@ -320,28 +410,6 @@ export default function ClanPage() {
         </div>
       )}
     </div>
-  );
-}
-
-/* ── Source Badge ── */
-function SourceBadge({ source }: { source: "cache" | "api" }) {
-  const isCache = source === "cache";
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${
-        isCache
-          ? "bg-chart-3/15 text-chart-3"
-          : "bg-chart-1/15 text-chart-1"
-      }`}
-      id="source-badge"
-    >
-      {isCache ? (
-        <Database className="h-3 w-3" />
-      ) : (
-        <Wifi className="h-3 w-3" />
-      )}
-      {isCache ? "Cached" : "Live API"}
-    </span>
   );
 }
 
