@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { getLinkedProfile, setLinkedProfile, unlinkProfile } from "@/lib/profile-store";
 import { Search, Loader2, User, Castle, Star, Trophy, AlertTriangle, Shield, LogOut, Hammer } from "lucide-react";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -67,14 +68,23 @@ export default function DashboardPage() {
     setLinkedTag(null);
     setPlayer(null);
     setClan(null);
-  }
-
   if (loading) {
     return (
-      <div className="flex h-[60vh] items-center justify-center">
-        <div className="flex flex-col items-center gap-4 text-muted-foreground">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p>Loading your dashboard...</p>
+      <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div>
+            <Skeleton className="h-9 w-64 mb-2" />
+            <Skeleton className="h-5 w-48" />
+          </div>
+          <Skeleton className="h-9 w-32 rounded-lg" />
+        </div>
+        <div className="space-y-6">
+          <Skeleton className="h-32 w-full rounded-2xl" />
+          <div className="grid md:grid-cols-3 gap-6">
+            <Skeleton className="h-48 rounded-2xl" />
+            <Skeleton className="h-48 rounded-2xl" />
+            <Skeleton className="h-48 rounded-2xl" />
+          </div>
         </div>
       </div>
     );

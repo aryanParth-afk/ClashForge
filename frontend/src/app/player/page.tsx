@@ -18,6 +18,7 @@ import {
   ShieldAlert,
   Flame
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const DARK_TROOPS = [
   "Minion", "Hog Rider", "Valkyrie", "Golem", "Witch", "Lava Hound", 
@@ -196,8 +197,16 @@ export default function PlayerPage() {
         </div>
       )}
 
+      {/* ── Skeleton Loader ── */}
+      {loading && (
+        <div className="space-y-6">
+          <Skeleton className="h-32 w-full rounded-2xl" />
+          <Skeleton className="h-[400px] w-full rounded-2xl" />
+        </div>
+      )}
+
       {/* ── Results ── */}
-      {profile && (
+      {profile && !loading && (
         <div className="space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
           {/* Profile Overview */}
           <div className="glass rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6 justify-between border border-border/50">

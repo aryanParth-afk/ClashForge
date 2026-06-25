@@ -15,6 +15,7 @@ import {
   Circle,
   Clock,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /* ── Constants ── */
 const AUTO_REFRESH_INTERVAL = 30_000; // 30 seconds
@@ -243,8 +244,23 @@ export default function ClanPage() {
         </div>
       )}
 
+      {/* ── Skeleton Loader ── */}
+      {loading && (
+        <div className="space-y-6">
+          <Skeleton className="h-14 w-full rounded-xl" />
+          <Skeleton className="h-32 w-full rounded-2xl" />
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <Skeleton className="h-24 w-full rounded-xl" />
+            <Skeleton className="h-24 w-full rounded-xl" />
+            <Skeleton className="h-24 w-full rounded-xl" />
+            <Skeleton className="h-24 w-full rounded-xl" />
+          </div>
+          <Skeleton className="h-[400px] w-full rounded-2xl" />
+        </div>
+      )}
+
       {/* ── Results ── */}
-      {clan && (
+      {clan && !loading && (
         <div
           className="space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
           id="clan-results"
