@@ -13,8 +13,32 @@ import {
   Castle,
   Trophy,
   Star,
-  Hammer
+  Hammer,
+  Dog,
+  ShieldAlert,
+  Flame
 } from "lucide-react";
+
+const DARK_TROOPS = [
+  "Minion", "Hog Rider", "Valkyrie", "Golem", "Witch", "Lava Hound", 
+  "Bowler", "Ice Golem", "Headhunter", "Apprentice Warden", "Druid"
+];
+
+const SIEGE_MACHINES = [
+  "Wall Wrecker", "Battle Blimp", "Stone Slammer", "Siege Barracks", 
+  "Log Launcher", "Flame Flinger", "Battle Drill"
+];
+
+const PETS = [
+  "L.A.S.S.I", "Electro Owl", "Mighty Yak", "Unicorn", "Frosty", 
+  "Diggy", "Poison Lizard", "Phoenix", "Spirit Fox", "Angry Jelly"
+];
+
+const SUPER_TROOPS = [
+  "Super Barbarian", "Super Archer", "Super Giant", "Sneaky Goblin", "Super Wall Breaker", 
+  "Rocket Balloon", "Super Wizard", "Super Dragon", "Inferno Dragon", "Super Minion", 
+  "Super Valkyrie", "Super Witch", "Ice Hound", "Super Bowler", "Super Miner", "Super Hog Rider"
+];
 
 interface CoCItem {
   name: string;
@@ -48,7 +72,7 @@ export default function PlayerPage() {
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"heroes" | "home_troops" | "builder_troops" | "spells">("heroes");
+  const [activeTab, setActiveTab] = useState<"heroes" | "elixir_troops" | "dark_troops" | "siege_machines" | "pets" | "builder_troops" | "spells">("heroes");
 
   async function handleSearch(e?: React.FormEvent) {
     if (e) e.preventDefault();
@@ -75,16 +99,24 @@ export default function PlayerPage() {
     }
   }
 
+  const homeTroops = profile ? profile.troops.filter(t => t.village === "home" && !SUPER_TROOPS.includes(t.name)) : [];
+  
   const tabs = profile ? [
     { key: "heroes" as const, label: "Heroes", count: profile.heroes.length, icon: <Crown className="h-3.5 w-3.5" /> },
-    { key: "home_troops" as const, label: "Home Troops", count: profile.troops.filter(t => t.village === "home").length, icon: <Sword className="h-3.5 w-3.5" /> },
+    { key: "elixir_troops" as const, label: "Elixir Troops", count: homeTroops.filter(t => !DARK_TROOPS.includes(t.name) && !SIEGE_MACHINES.includes(t.name) && !PETS.includes(t.name)).length, icon: <Sword className="h-3.5 w-3.5" /> },
+    { key: "dark_troops" as const, label: "Dark Troops", count: homeTroops.filter(t => DARK_TROOPS.includes(t.name)).length, icon: <Flame className="h-3.5 w-3.5" /> },
+    { key: "siege_machines" as const, label: "Siege Machines", count: homeTroops.filter(t => SIEGE_MACHINES.includes(t.name)).length, icon: <ShieldAlert className="h-3.5 w-3.5" /> },
+    { key: "pets" as const, label: "Pets", count: homeTroops.filter(t => PETS.includes(t.name)).length, icon: <Dog className="h-3.5 w-3.5" /> },
     { key: "builder_troops" as const, label: "Builder Troops", count: profile.troops.filter(t => t.village === "builderBase").length, icon: <Hammer className="h-3.5 w-3.5" /> },
     { key: "spells" as const, label: "Spells", count: profile.spells.length, icon: <FlaskConical className="h-3.5 w-3.5" /> },
   ].filter(t => t.count > 0) : [];
 
   const activeItems = profile ? (
     activeTab === "heroes" ? profile.heroes :
-    activeTab === "home_troops" ? profile.troops.filter(t => t.village === "home") :
+    activeTab === "elixir_troops" ? homeTroops.filter(t => !DARK_TROOPS.includes(t.name) && !SIEGE_MACHINES.includes(t.name) && !PETS.includes(t.name)) :
+    activeTab === "dark_troops" ? homeTroops.filter(t => DARK_TROOPS.includes(t.name)) :
+    activeTab === "siege_machines" ? homeTroops.filter(t => SIEGE_MACHINES.includes(t.name)) :
+    activeTab === "pets" ? homeTroops.filter(t => PETS.includes(t.name)) :
     activeTab === "builder_troops" ? profile.troops.filter(t => t.village === "builderBase") :
     profile.spells
   ) : [];
