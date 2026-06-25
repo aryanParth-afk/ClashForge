@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getLinkedProfile, setLinkedProfile, unlinkProfile } from "@/lib/profile-store";
-import { Search, Loader2, User, Castle, Star, Trophy, AlertTriangle, Shield, LogOut } from "lucide-react";
+import { Search, Loader2, User, Castle, Star, Trophy, AlertTriangle, Shield, LogOut, Hammer } from "lucide-react";
 import Link from "next/link";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -172,7 +172,19 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Upgrade Planner Link */}
+            <Link href={`/player?tag=${encodeURIComponent(player.tag)}&tab=upgrades`} className="glass rounded-2xl p-6 border border-border/50 hover:bg-accent/40 transition-colors group">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold flex items-center gap-2"><Hammer className="w-5 h-5 text-chart-5" /> Upgrades</h3>
+                <span className="text-xs font-medium bg-chart-5/10 text-chart-5 px-2 py-1 rounded">Planner</span>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                You have <strong className="text-foreground">{player.troops.filter((t: any) => t.village === "home" && t.level < t.maxLevel && !["Super Barbarian", "Super Archer", "Super Giant", "Sneaky Goblin", "Super Wall Breaker", "Rocket Balloon", "Super Wizard", "Super Dragon", "Inferno Dragon", "Super Minion", "Super Valkyrie", "Super Witch", "Ice Hound", "Super Bowler", "Super Miner", "Super Hog Rider", "Super Yeti"].includes(t.name)).length + player.spells.filter((s: any) => s.level < s.maxLevel).length + player.heroes.filter((h: any) => h.level < h.maxLevel).length + player.heroes.flatMap((h: any) => h.equipment || []).filter((e: any) => e.level < e.maxLevel).length}</strong> pending upgrades remaining for your current Town Hall.
+              </p>
+              <span className="text-sm font-semibold text-primary group-hover:underline">View Planner &rarr;</span>
+            </Link>
+
             {/* Detailed Stats Link */}
             <Link href={`/player?tag=${encodeURIComponent(player.tag)}`} className="glass rounded-2xl p-6 border border-border/50 hover:bg-accent/40 transition-colors group">
               <div className="flex items-center justify-between mb-4">
