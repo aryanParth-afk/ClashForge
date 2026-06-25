@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   Loader2,
@@ -76,16 +76,25 @@ export default function PlayerPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"heroes" | "elixir_troops" | "dark_troops" | "siege_machines" | "pets" | "builder_troops" | "spells">("heroes");
 
-  async function handleSearch(e?: React.FormEvent) {
-    if (e) e.preventDefault();
-    if (!tagInput.trim()) return;
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tag = params.get('tag');
+      if (tag) {
+        setTagInput(tag);
+        performSearch(tag);
+      }
+    }
+  }, []);
 
+  async function performSearch(tag: string) {
+    if (!tag.trim()) return;
     setLoading(true);
     setError(null);
     setProfile(null);
 
     try {
-      const res = await fetch(`/api/player?tag=${encodeURIComponent(tagInput)}`);
+      const res = await fetch(`/api/player?tag=${encodeURIComponent(tag)}`);
       const data = await res.json();
 
       if (!res.ok) {
@@ -99,6 +108,11 @@ export default function PlayerPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    performSearch(tagInput);
   }
 
   const homeTroops = profile ? profile.troops.filter(t => t.village === "home" && !SUPER_TROOPS.includes(t.name)) : [];

@@ -141,6 +141,20 @@ export default function ClanPage() {
     };
   }, [activeTag, fetchClan]);
 
+  /* ── Search from URL ── */
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tag = params.get('tag');
+      if (tag) {
+        setTagInput(tag);
+        setActiveTag(tag);
+        setSecondsUntilRefresh(AUTO_REFRESH_INTERVAL / 1000);
+        fetchClan(tag);
+      }
+    }
+  }, [fetchClan]);
+
   /* ── Search handler ── */
   async function handleSearch() {
     const tag = tagInput.trim();

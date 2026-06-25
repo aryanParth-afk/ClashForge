@@ -174,7 +174,7 @@ export default function DashboardPage() {
 
           <div className="grid md:grid-cols-2 gap-6">
             {/* Detailed Stats Link */}
-            <Link href="/player" className="glass rounded-2xl p-6 border border-border/50 hover:bg-accent/40 transition-colors group">
+            <Link href={`/player?tag=${encodeURIComponent(player.tag)}`} className="glass rounded-2xl p-6 border border-border/50 hover:bg-accent/40 transition-colors group">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold flex items-center gap-2"><User className="w-5 h-5 text-chart-1" /> Full Analyzer</h3>
                 <span className="text-xs font-medium bg-chart-1/10 text-chart-1 px-2 py-1 rounded">Levels & Equip</span>
@@ -187,7 +187,7 @@ export default function DashboardPage() {
 
             {/* Clan Summary Card */}
             {clan ? (
-              <Link href="/clan" className="glass rounded-2xl p-6 border border-border/50 hover:bg-accent/40 transition-colors group">
+              <Link href={`/clan?tag=${encodeURIComponent(clan.tag)}`} className="glass rounded-2xl p-6 border border-border/50 hover:bg-accent/40 transition-colors group">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold flex items-center gap-2"><Shield className="w-5 h-5 text-chart-2" /> Your Clan</h3>
                   <span className="text-xs font-medium bg-chart-2/10 text-chart-2 px-2 py-1 rounded">Lvl {clan.clanLevel}</span>
