@@ -27,7 +27,25 @@ async function fetchTexts(): Promise<Record<string, string>> {
   }
 }
 
-async function fetchAndParseCSV(filename: string, startId: number, textsMap: Record<string, string>): Promise<Record<number, string>> {
+function parseCSVRow(line: string) {
+    const parts = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+        if (line[i] === '"') {
+            inQuotes = !inQuotes;
+        } else if (line[i] === ',' && !inQuotes) {
+            parts.push(current);
+            current = '';
+        } else {
+            current += line[i];
+        }
+    }
+    parts.push(current);
+    return parts;
+}
+
+async function fetchAndParseCSV(filename: string, startId: number, textsMap: Record<string, string>) {
   try {
     const res = await fetch(`${BASE_URL}/${filename}`, {
       next: { revalidate: 86400 } // Cache for 24 hours
@@ -40,38 +58,37 @@ async function fetchAndParseCSV(filename: string, startId: number, textsMap: Rec
     
     const data = await res.text();
     const lines = data.split('\n');
-    const mapping: Record<number, string> = {};
+    
+    let villageTypeIndex = -1;
+    if (lines.length > 0) {
+        const headers = parseCSVRow(lines[0]);
+        villageTypeIndex = headers.indexOf('VillageType');
+    }
+    
+    const mapping: Record<number, { name: string, village: 'home' | 'builder' }> = {};
     let currentIndex = 0;
     
     for (let i = 2; i < lines.length; i++) {
         const line = lines[i];
         if (!line.trim()) continue;
         
-        // We only care about rows that start with a string (new item definition)
-        // e.g. "Troop Housing",1,"TID_BUILDING_HOUSING"
-        const match = line.match(/^"([^"]+)"\s*,[^,]*,\s*"([^"]+)"/);
+        const parts = parseCSVRow(line);
+        const internalName = parts[0];
         
-        if (match && match[1] && match[1] !== "String" && match[1] !== "Name") {
-            const internalName = match[1];
-            const tid = match[2];
-            
-            // Map to the human-readable English text if it exists, otherwise fallback to internal name
+        if (internalName && internalName !== "String" && internalName !== "Name") {
+            const tid = parts[2];
             const cleanName = textsMap[tid] || internalName;
             
-            mapping[startId + currentIndex] = cleanName;
-            currentIndex++;
-        } else {
-            // Some CSVs might not have a TID column for every row. We still need to increment index 
-            // if it's a new item (but maybe it doesn't match the regex perfectly).
-            // Let's do a fallback match just for the name if the TID is missing.
-            const fallbackMatch = line.match(/^"([^"]+)"/);
-            if (fallbackMatch && fallbackMatch[1] && fallbackMatch[1] !== "String" && fallbackMatch[1] !== "Name") {
-                // Check if we already handled this in the primary match
-                if (!match) {
-                    mapping[startId + currentIndex] = fallbackMatch[1];
-                    currentIndex++;
-                }
+            let village: 'home' | 'builder' = 'home';
+            if (villageTypeIndex !== -1 && parts[villageTypeIndex] === '1') {
+                village = 'builder';
             }
+            if (cleanName.includes("Master Builder") || cleanName.includes("O.T.T.O") || cleanName.includes("B.O.B")) {
+                village = 'builder';
+            }
+            
+            mapping[startId + currentIndex] = { name: cleanName, village };
+            currentIndex++;
         }
     }
     return mapping;

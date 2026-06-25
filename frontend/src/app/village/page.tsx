@@ -23,6 +23,7 @@ interface ParsedItem {
   count: number;
   category: "building" | "troop" | "hero" | "spell" | "unknown";
   upgrading: boolean;
+  village: "home" | "builder";
 }
 
 interface ParsedResult {
@@ -35,11 +36,16 @@ interface ParsedResult {
   busy_builders: number;
 }
 
+interface DynamicItem {
+  name: string;
+  village?: "home" | "builder";
+}
+
 interface DynamicMetadata {
-  buildings?: Record<number, string>;
-  troops?: Record<number, string>;
-  spells?: Record<number, string>;
-  heroes?: Record<number, string>;
+  buildings?: Record<number, string | DynamicItem>;
+  troops?: Record<number, string | DynamicItem>;
+  spells?: Record<number, string | DynamicItem>;
+  heroes?: Record<number, string | DynamicItem>;
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -231,26 +237,42 @@ const SPELL_ID_MAP: Record<number, string> = {
   26000013: "Overgrowth Spell",
 };
 
-function resolveItem(dataId: number, dynamicMetadata?: DynamicMetadata): { name: string; category: ParsedItem["category"] } {
+function resolveItem(dataId: number, dynamicMetadata?: DynamicMetadata): { name: string; category: ParsedItem["category"]; village: "home" | "builder" } {
   // 1. Check dynamic metadata first (ensures we get the latest game updates)
-  if (dynamicMetadata?.buildings?.[dataId]) return { name: dynamicMetadata.buildings[dataId], category: "building" };
-  if (dynamicMetadata?.troops?.[dataId]) return { name: dynamicMetadata.troops[dataId], category: "troop" };
-  if (dynamicMetadata?.heroes?.[dataId]) return { name: dynamicMetadata.heroes[dataId], category: "hero" };
-  if (dynamicMetadata?.spells?.[dataId]) return { name: dynamicMetadata.spells[dataId], category: "spell" };
+  if (dynamicMetadata?.buildings?.[dataId]) {
+      const meta = dynamicMetadata.buildings[dataId];
+      return { 
+          name: typeof meta === 'string' ? meta : meta.name, 
+          category: "building", 
+          village: typeof meta === 'string' ? "home" : (meta.village || "home")
+      };
+  }
+  if (dynamicMetadata?.troops?.[dataId]) {
+      const meta = dynamicMetadata.troops[dataId];
+      return { name: typeof meta === 'string' ? meta : meta.name, category: "troop", village: typeof meta === 'string' ? "home" : (meta.village || "home") };
+  }
+  if (dynamicMetadata?.heroes?.[dataId]) {
+      const meta = dynamicMetadata.heroes[dataId];
+      return { name: typeof meta === 'string' ? meta : meta.name, category: "hero", village: typeof meta === 'string' ? "home" : (meta.village || "home") };
+  }
+  if (dynamicMetadata?.spells?.[dataId]) {
+      const meta = dynamicMetadata.spells[dataId];
+      return { name: typeof meta === 'string' ? meta : meta.name, category: "spell", village: typeof meta === 'string' ? "home" : (meta.village || "home") };
+  }
 
   // 2. Fallback to hardcoded mapping
-  if (BUILDING_ID_MAP[dataId]) return { name: BUILDING_ID_MAP[dataId], category: "building" };
-  if (TROOP_ID_MAP[dataId]) return { name: TROOP_ID_MAP[dataId], category: "troop" };
-  if (HERO_ID_MAP[dataId]) return { name: HERO_ID_MAP[dataId], category: "hero" };
-  if (SPELL_ID_MAP[dataId]) return { name: SPELL_ID_MAP[dataId], category: "spell" };
+  if (BUILDING_ID_MAP[dataId]) return { name: BUILDING_ID_MAP[dataId], category: "building", village: "home" };
+  if (TROOP_ID_MAP[dataId]) return { name: TROOP_ID_MAP[dataId], category: "troop", village: "home" };
+  if (HERO_ID_MAP[dataId]) return { name: HERO_ID_MAP[dataId], category: "hero", village: "home" };
+  if (SPELL_ID_MAP[dataId]) return { name: SPELL_ID_MAP[dataId], category: "spell", village: "home" };
 
   // 3. Guess category by ID range if totally unknown
-  if (dataId >= 12000000 && dataId < 13000000) return { name: `Building (${dataId})`, category: "building" };
-  if (dataId >= 1000000 && dataId < 2000000) return { name: `Building (${dataId})`, category: "building" };
-  if (dataId >= 4000000 && dataId < 5000000) return { name: `Troop (${dataId})`, category: "troop" };
-  if (dataId >= 28000000 && dataId < 29000000) return { name: `Hero (${dataId})`, category: "hero" };
-  if (dataId >= 26000000 && dataId < 27000000) return { name: `Spell (${dataId})`, category: "spell" };
-  return { name: `Unknown (${dataId})`, category: "unknown" };
+  if (dataId >= 12000000 && dataId < 13000000) return { name: `Building (${dataId})`, category: "building", village: "home" };
+  if (dataId >= 1000000 && dataId < 2000000) return { name: `Building (${dataId})`, category: "building", village: "home" };
+  if (dataId >= 4000000 && dataId < 5000000) return { name: `Troop (${dataId})`, category: "troop", village: "home" };
+  if (dataId >= 28000000 && dataId < 29000000) return { name: `Hero (${dataId})`, category: "hero", village: "home" };
+  if (dataId >= 26000000 && dataId < 27000000) return { name: `Spell (${dataId})`, category: "spell", village: "home" };
+  return { name: `Unknown (${dataId})`, category: "unknown", village: "home" };
 }
 
 /* ── Flexible JSON Parser ──
@@ -286,6 +308,7 @@ function extractEntries(data: unknown, hintCategory?: ParsedItem["category"], dy
           count: Number(item.cnt ?? item.count ?? 1),
           timer: Number(item.timer ?? item.remaining ?? item.upgradeTime ?? 0),
           category: hintCategory ?? resolved.category,
+          village: resolved.village,
         };
       });
 
@@ -369,6 +392,7 @@ function parseVillageData(raw: unknown, dynamicMetadata?: DynamicMetadata): Pars
       count: entry.count,
       category: entry.category,
       upgrading: entry.timer > 0,
+      village: resolved.village,
     };
 
     if (item.upgrading) busyBuilders++;
@@ -451,12 +475,13 @@ export default function VillagePage() {
   const [result, setResult] = useState<ParsedResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"buildings" | "troops" | "heroes" | "spells">("buildings");
+  const [activeTab, setActiveTab] = useState<string>("home_buildings");
   
   // State for dynamically fetched CoC metadata
   const [dynamicMetadata, setDynamicMetadata] = useState<DynamicMetadata | undefined>(undefined);
   
   useEffect(() => {
+    
     // Fetch latest CoC mappings in background
     fetch("/api/coc-metadata")
       .then(res => res.json())
@@ -485,9 +510,12 @@ export default function VillagePage() {
     try {
       const data = parseVillageData(parsed, dynamicMetadata);
       setResult(data);
+      
       // Auto-select first non-empty tab
-      if (data.buildings.length > 0) setActiveTab("buildings");
-      else if (data.troops.length > 0) setActiveTab("troops");
+      if (data.buildings.filter(b => b.village !== 'builder').length > 0) setActiveTab("home_buildings");
+      else if (data.buildings.filter(b => b.village === 'builder').length > 0) setActiveTab("builder_buildings");
+      else if (data.troops.filter(b => b.village !== 'builder').length > 0) setActiveTab("home_troops");
+      else if (data.troops.filter(b => b.village === 'builder').length > 0) setActiveTab("builder_troops");
       else if (data.heroes.length > 0) setActiveTab("heroes");
       else if (data.spells.length > 0) setActiveTab("spells");
     } catch (err: unknown) {
@@ -505,15 +533,23 @@ export default function VillagePage() {
 
   const tabs = result
     ? [
-        { key: "buildings" as const, label: "Buildings", count: result.buildings.length, icon: <Castle className="h-3.5 w-3.5" /> },
-        { key: "troops" as const, label: "Troops", count: result.troops.length, icon: <Sword className="h-3.5 w-3.5" /> },
-        { key: "heroes" as const, label: "Heroes", count: result.heroes.length, icon: <Crown className="h-3.5 w-3.5" /> },
-        { key: "spells" as const, label: "Spells", count: result.spells.length, icon: <FlaskConical className="h-3.5 w-3.5" /> },
+        { key: "home_buildings", label: "Home Buildings", count: result.buildings.filter(b => b.village !== 'builder').length, icon: <Castle className="h-3.5 w-3.5" /> },
+        { key: "builder_buildings", label: "Builder Base", count: result.buildings.filter(b => b.village === 'builder').length, icon: <Hammer className="h-3.5 w-3.5" /> },
+        { key: "home_troops", label: "Troops", count: result.troops.filter(b => b.village !== 'builder').length, icon: <Sword className="h-3.5 w-3.5" /> },
+        { key: "builder_troops", label: "Builder Troops", count: result.troops.filter(b => b.village === 'builder').length, icon: <Sword className="h-3.5 w-3.5" /> },
+        { key: "heroes", label: "Heroes", count: result.heroes.length, icon: <Crown className="h-3.5 w-3.5" /> },
+        { key: "spells", label: "Spells", count: result.spells.length, icon: <FlaskConical className="h-3.5 w-3.5" /> },
       ]
     : [];
 
   const activeItems = result
-    ? result[activeTab]
+    ? activeTab === "home_buildings" ? result.buildings.filter(b => b.village !== 'builder')
+    : activeTab === "builder_buildings" ? result.buildings.filter(b => b.village === 'builder')
+    : activeTab === "home_troops" ? result.troops.filter(b => b.village !== 'builder')
+    : activeTab === "builder_troops" ? result.troops.filter(b => b.village === 'builder')
+    : activeTab === "heroes" ? result.heroes
+    : activeTab === "spells" ? result.spells
+    : []
     : [];
 
   return (
@@ -623,8 +659,8 @@ export default function VillagePage() {
                     <th className="px-5 py-3">#</th>
                     <th className="px-5 py-3">Name</th>
                     <th className="px-5 py-3 text-center">Level</th>
-                    {activeTab === "buildings" && <th className="px-5 py-3 text-center">Count</th>}
-                    {activeTab === "buildings" && <th className="px-5 py-3 text-center">Status</th>}
+                    {activeTab.includes("buildings") && <th className="px-5 py-3 text-center">Count</th>}
+                    {activeTab.includes("buildings") && <th className="px-5 py-3 text-center">Status</th>}
                     <th className="px-5 py-3 text-right">Data ID</th>
                   </tr>
                 </thead>
@@ -638,12 +674,12 @@ export default function VillagePage() {
                           {item.level}
                         </span>
                       </td>
-                      {activeTab === "buildings" && (
+                      {activeTab.includes("buildings") && (
                         <td className="px-5 py-3 text-center">
                           <span className="text-xs font-mono text-muted-foreground">×{item.count}</span>
                         </td>
                       )}
-                      {activeTab === "buildings" && (
+                      {activeTab.includes("buildings") && (
                         <td className="px-5 py-3 text-center">
                           {item.upgrading ? (
                             <span className="inline-flex items-center gap-1 rounded-full bg-chart-4/15 px-2.5 py-0.5 text-xs font-medium text-chart-4">
