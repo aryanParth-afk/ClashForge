@@ -68,6 +68,8 @@ export default function DashboardPage() {
     setLinkedTag(null);
     setPlayer(null);
     setClan(null);
+  }
+
   if (loading) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
