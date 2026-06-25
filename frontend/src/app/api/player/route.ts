@@ -12,13 +12,13 @@ export async function GET(request: Request) {
   const cleanTag = tag.replace(/^#/, '').toUpperCase();
   const encodedTag = `%23${cleanTag}`;
 
-  const token = process.env.COC_API_TOKEN;
+  const token = (process.env.COC_API_TOKEN || "").trim();
   if (!token) {
     return NextResponse.json({ error: 'COC_API_TOKEN is not configured' }, { status: 500 });
   }
 
   try {
-    const url = `https://cocproxy.royaleapi.dev/v1/players/${encodedTag}`;
+    const url = `https://api.clashofclans.com/v1/players/${encodedTag}`;
     const res = await fetch(url, {
       headers: {
         'Authorization': `Bearer ${token}`,

@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Swords, Home, Castle, Users } from "lucide-react";
+import { Swords, Home, Castle, Users, User } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/", label: "Home", icon: Home },
   { href: "/village", label: "Village", icon: Castle },
+  { href: "/player", label: "Player", icon: User },
   { href: "/clan", label: "Clan", icon: Users },
 ] as const;
 

@@ -68,7 +68,6 @@ async function fetchAndParseCSV(filename: string, startId: number, textsMap: Rec
     }
     
     const mapping: Record<number, { name: string, village: 'home' | 'builder' }> = {};
-    let currentIndex = 0;
     
     for (let i = 2; i < lines.length; i++) {
         const line = lines[i];
@@ -89,8 +88,9 @@ async function fetchAndParseCSV(filename: string, startId: number, textsMap: Rec
                 village = 'builder';
             }
             
-            mapping[startId + currentIndex] = { name: cleanName, village };
-            currentIndex++;
+            // In Supercell CSVs, the ID is strictly determined by its physical row index
+            const actualId = startId + (i - 2);
+            mapping[actualId] = { name: cleanName, village };
         }
     }
     return mapping;
