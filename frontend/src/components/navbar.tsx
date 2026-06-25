@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Swords, Home, Users, User } from "lucide-react";
+import { Swords, Home, Users, User, LayoutDashboard } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/", label: "Home", icon: Home },
-  { href: "/player", label: "Player", icon: User },
-  { href: "/clan", label: "Clan", icon: Users },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/player", label: "Search Player", icon: User },
+  { href: "/clan", label: "Search Clan", icon: Users },
 ] as const;
 
 export function Navbar() {
