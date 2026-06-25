@@ -31,7 +31,8 @@ const SIEGE_MACHINES = [
 
 const PETS = [
   "L.A.S.S.I", "Electro Owl", "Mighty Yak", "Unicorn", "Frosty", 
-  "Diggy", "Poison Lizard", "Phoenix", "Spirit Fox", "Angry Jelly"
+  "Diggy", "Poison Lizard", "Phoenix", "Spirit Fox", "Angry Jelly",
+  "Sneezy", "Greedy Raven"
 ];
 
 const SUPER_TROOPS = [
