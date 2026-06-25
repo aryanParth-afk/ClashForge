@@ -1,13 +1,13 @@
-import { Swords, Castle, Users, ArrowRight } from "lucide-react";
+import { Swords, User, Users, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 const FEATURES = [
   {
-    icon: Castle,
-    title: "Village Analyser",
+    icon: User,
+    title: "Player Analyzer",
     description:
-      "Paste your village export JSON and instantly see every building, its level, and which builders are busy.",
-    href: "/village",
+      "Enter any player tag to instantly view their accurate profile, hero equipment, and troop levels.",
+    href: "/player",
     color: "text-chart-1",
     bgColor: "bg-chart-1/10",
   },
@@ -44,11 +44,11 @@ export default function HomePage() {
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
           <Link
-            href="/village"
-            id="cta-village"
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110 glow"
+            href="/player"
+            id="cta-player"
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110 hover:shadow-[0_0_20px_rgba(45,212,191,0.4)]"
           >
-            Analyse Village
+            Analyse Player
             <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
