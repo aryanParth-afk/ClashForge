@@ -26,7 +26,7 @@ const DARK_TROOPS = [
 
 const SIEGE_MACHINES = [
   "Wall Wrecker", "Battle Blimp", "Stone Slammer", "Siege Barracks", 
-  "Log Launcher", "Flame Flinger", "Battle Drill"
+  "Log Launcher", "Flame Flinger", "Battle Drill", "Sky Wagon", "Troop Launcher"
 ];
 
 const PETS = [
@@ -37,7 +37,8 @@ const PETS = [
 const SUPER_TROOPS = [
   "Super Barbarian", "Super Archer", "Super Giant", "Sneaky Goblin", "Super Wall Breaker", 
   "Rocket Balloon", "Super Wizard", "Super Dragon", "Inferno Dragon", "Super Minion", 
-  "Super Valkyrie", "Super Witch", "Ice Hound", "Super Bowler", "Super Miner", "Super Hog Rider"
+  "Super Valkyrie", "Super Witch", "Ice Hound", "Super Bowler", "Super Miner", "Super Hog Rider",
+  "Super Yeti"
 ];
 
 interface CoCItem {
