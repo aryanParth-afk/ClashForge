@@ -60,9 +60,11 @@ async function fetchAndParseCSV(filename: string, startId: number, textsMap: Rec
     const lines = data.split('\n');
     
     let villageTypeIndex = -1;
+    let tidIndex = -1;
     if (lines.length > 0) {
         const headers = parseCSVRow(lines[0]);
         villageTypeIndex = headers.indexOf('VillageType');
+        tidIndex = headers.indexOf('TID');
     }
     
     const mapping: Record<number, { name: string, village: 'home' | 'builder' }> = {};
@@ -76,7 +78,7 @@ async function fetchAndParseCSV(filename: string, startId: number, textsMap: Rec
         const internalName = parts[0];
         
         if (internalName && internalName !== "String" && internalName !== "Name") {
-            const tid = parts[2];
+            const tid = tidIndex !== -1 ? parts[tidIndex] : parts[2];
             const cleanName = textsMap[tid] || internalName;
             
             let village: 'home' | 'builder' = 'home';

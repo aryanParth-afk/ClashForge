@@ -1,0 +1,252 @@
+"use client";
+
+import { useState } from "react";
+import {
+  Search,
+  Loader2,
+  Sparkles,
+  Sword,
+  Crown,
+  FlaskConical,
+  AlertTriangle,
+  User,
+  Castle,
+  Trophy,
+  Star,
+  Hammer
+} from "lucide-react";
+
+interface CoCItem {
+  name: string;
+  level: number;
+  maxLevel: number;
+  village: "home" | "builderBase";
+}
+
+interface CoCHero extends CoCItem {
+  equipment?: { name: string; level: number; maxLevel: number }[];
+}
+
+interface PlayerProfile {
+  tag: string;
+  name: string;
+  townHallLevel: number;
+  expLevel: number;
+  trophies: number;
+  bestTrophies: number;
+  warStars: number;
+  builderHallLevel?: number;
+  builderBaseTrophies?: number;
+  league?: { name: string; iconUrls: { small: string } };
+  heroes: CoCHero[];
+  troops: CoCItem[];
+  spells: CoCItem[];
+}
+
+export default function PlayerPage() {
+  const [tagInput, setTagInput] = useState("");
+  const [profile, setProfile] = useState<PlayerProfile | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"heroes" | "home_troops" | "builder_troops" | "spells">("heroes");
+
+  async function handleSearch(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    if (!tagInput.trim()) return;
+
+    setLoading(true);
+    setError(null);
+    setProfile(null);
+
+    try {
+      const res = await fetch(`/api/player?tag=${encodeURIComponent(tagInput)}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to fetch player profile");
+      }
+
+      setProfile(data);
+      setActiveTab("heroes");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const tabs = profile ? [
+    { key: "heroes" as const, label: "Heroes", count: profile.heroes.length, icon: <Crown className="h-3.5 w-3.5" /> },
+    { key: "home_troops" as const, label: "Home Troops", count: profile.troops.filter(t => t.village === "home").length, icon: <Sword className="h-3.5 w-3.5" /> },
+    { key: "builder_troops" as const, label: "Builder Troops", count: profile.troops.filter(t => t.village === "builderBase").length, icon: <Hammer className="h-3.5 w-3.5" /> },
+    { key: "spells" as const, label: "Spells", count: profile.spells.length, icon: <FlaskConical className="h-3.5 w-3.5" /> },
+  ].filter(t => t.count > 0) : [];
+
+  const activeItems = profile ? (
+    activeTab === "heroes" ? profile.heroes :
+    activeTab === "home_troops" ? profile.troops.filter(t => t.village === "home") :
+    activeTab === "builder_troops" ? profile.troops.filter(t => t.village === "builderBase") :
+    profile.spells
+  ) : [];
+
+  return (
+    <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+      {/* ── Header ── */}
+      <div className="flex items-center gap-3 mb-1">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+          <User className="h-5 w-5 text-primary" />
+        </div>
+        <h1 className="text-2xl font-bold tracking-tight">Player Analyzer</h1>
+      </div>
+      <p className="text-muted-foreground mb-8">
+        Enter any player tag to instantly view their 100% accurate profile, hero levels, and troops directly from the official Clash of Clans API.
+      </p>
+
+      {/* ── Input Card ── */}
+      <div className="glass rounded-2xl p-6 mb-6">
+        <form onSubmit={handleSearch} className="flex gap-3 max-w-md">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              placeholder="e.g. #P8L0Y00L"
+              className="w-full rounded-xl border border-border bg-background/50 pl-10 pr-4 py-2.5 font-mono text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading || !tagInput.trim()}
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed glow shrink-0"
+          >
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            {loading ? "Searching…" : "Search"}
+          </button>
+        </form>
+      </div>
+
+      {/* ── Error ── */}
+      {error && (
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* ── Results ── */}
+      {profile && (
+        <div className="space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
+          {/* Profile Overview */}
+          <div className="glass rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6 justify-between border border-border/50">
+            <div className="flex items-center gap-4">
+              {profile.league && (
+                <img src={profile.league.iconUrls.small} alt={profile.league.name} className="w-16 h-16 object-contain drop-shadow-md" />
+              )}
+              <div>
+                <h2 className="text-3xl font-bold text-foreground mb-1">{profile.name}</h2>
+                <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground font-mono">
+                  <span className="bg-muted/50 px-2.5 py-1 rounded-md border border-border/50">{profile.tag}</span>
+                  <span className="flex items-center gap-1.5"><Castle className="w-4 h-4 text-chart-2" /> TH {profile.townHallLevel}</span>
+                  <span className="flex items-center gap-1.5"><Star className="w-4 h-4 text-chart-4" /> LVL {profile.expLevel}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-4">
+              <div className="text-center px-4 py-2 bg-background/50 rounded-xl border border-border/50 shadow-sm">
+                <div className="text-xs text-muted-foreground mb-1 font-medium flex justify-center items-center gap-1"><Trophy className="w-3 h-3 text-chart-3" /> Trophies</div>
+                <div className="text-xl font-bold">{profile.trophies.toLocaleString()}</div>
+              </div>
+              <div className="text-center px-4 py-2 bg-background/50 rounded-xl border border-border/50 shadow-sm">
+                <div className="text-xs text-muted-foreground mb-1 font-medium flex justify-center items-center gap-1"><Star className="w-3 h-3 text-chart-5" /> War Stars</div>
+                <div className="text-xl font-bold">{profile.warStars.toLocaleString()}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Tabbed data table */}
+          <div className="glass rounded-2xl overflow-hidden shadow-lg border border-border/50">
+            {/* Tab bar */}
+            <div className="flex border-b border-border overflow-x-auto bg-background/20">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-all border-b-2 whitespace-nowrap ${
+                    activeTab === tab.key
+                      ? "border-primary text-primary bg-primary/10 shadow-[inset_0_-2px_0_var(--theme-primary)]"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                  }`}
+                >
+                  {tab.icon}
+                  {tab.label}
+                  <span className={`ml-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                    activeTab === tab.key ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
+                  }`}>
+                    {tab.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-background/40 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <th className="px-6 py-4">Name</th>
+                    <th className="px-6 py-4 text-center">Level</th>
+                    {activeTab === "heroes" && <th className="px-6 py-4">Equipment</th>}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/50 bg-background/20">
+                  {activeItems.map((item, i) => {
+                    const isMax = item.level === item.maxLevel;
+                    return (
+                      <tr key={i} className="transition-colors hover:bg-accent/40 group">
+                        <td className="px-6 py-4 font-medium text-foreground flex items-center gap-3">
+                          {item.name}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex justify-center">
+                            <span className={`inline-flex h-8 min-w-[3rem] items-center justify-center rounded-lg px-2.5 text-sm font-bold shadow-sm border ${
+                              isMax 
+                                ? "bg-chart-3/20 text-chart-3 border-chart-3/30 ring-1 ring-chart-3/20" 
+                                : "bg-primary/10 text-primary border-primary/20"
+                            }`}>
+                              {item.level}
+                              {isMax && <Star className="w-3 h-3 ml-1 fill-current opacity-70" />}
+                            </span>
+                          </div>
+                        </td>
+                        {activeTab === "heroes" && (
+                          <td className="px-6 py-4">
+                            <div className="flex gap-2 flex-wrap">
+                              {("equipment" in item && item.equipment && item.equipment.length > 0) ? (
+                                item.equipment.map((eq, j) => (
+                                  <span key={j} className="inline-flex items-center gap-1.5 rounded-md bg-background/60 border border-border/60 px-2.5 py-1 text-xs font-medium text-muted-foreground shadow-sm">
+                                    <span className="text-foreground">{eq.name}</span>
+                                    <span className={eq.level === eq.maxLevel ? "text-chart-3" : "text-primary/70"}>
+                                      L{eq.level}
+                                    </span>
+                                  </span>
+                                ))
+                              ) : (
+                                <span className="text-xs text-muted-foreground/50 italic">No equipment</span>
+                              )}
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
