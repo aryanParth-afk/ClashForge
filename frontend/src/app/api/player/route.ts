@@ -18,7 +18,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const url = `https://api.clashofclans.com/v1/players/${encodedTag}`;
+    const url = `https://cocproxy.royaleapi.dev/v1/players/${encodedTag}`;
     const res = await fetch(url, {
       headers: {
         'Authorization': `Bearer ${token}`,
