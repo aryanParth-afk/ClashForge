@@ -41,7 +41,24 @@ export const CLASH_DATA = {
     "Freeze Spell", "Clone Spell", "Invisibility Spell", "Recall Spell", "Revive Spell",
     "Poison Spell", "Earthquake Spell", "Haste Spell", "Skeleton Spell",
     "Bat Spell", "Overgrowth Spell", "Totem Spell", "Ice Block Spell"
-  ]
+  ],
+  buildings: {
+    defenses: [
+      "Cannon", "Archer Tower", "Mortar", "Air Defense", "Wizard Tower",
+      "Air Sweeper", "Hidden Tesla", "Bomb Tower", "X-Bow", "Inferno Tower",
+      "Eagle Artillery", "Scattershot", "Builder's Hut", "Spell Tower", "Monolith",
+      "Multi-Archer Tower", "Ricochet Cannon"
+    ],
+    army: [
+      "Army Camp", "Barracks", "Dark Barracks", "Laboratory",
+      "Spell Factory", "Dark Spell Factory", "Siege Workshop", "Pet House"
+    ],
+    resources: [
+      "Gold Mine", "Elixir Collector", "Dark Elixir Drill",
+      "Gold Storage", "Elixir Storage", "Dark Elixir Storage",
+      "Clan Castle", "Town Hall"
+    ]
+  }
 };
 
 export const CLASH_DESCRIPTIONS: Record<string, string> = {

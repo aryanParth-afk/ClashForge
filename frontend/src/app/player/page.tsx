@@ -19,6 +19,7 @@ import {
   Flame
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BuildingTracker } from "@/components/BuildingTracker";
 
 const DARK_TROOPS = [
   "Minion", "Hog Rider", "Valkyrie", "Golem", "Witch", "Lava Hound", 
@@ -75,7 +76,7 @@ export default function PlayerPage() {
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"upgrades" | "heroes" | "elixir_troops" | "dark_troops" | "siege_machines" | "pets" | "builder_troops" | "spells">("heroes");
+  const [activeTab, setActiveTab] = useState<"upgrades" | "buildings" | "heroes" | "elixir_troops" | "dark_troops" | "siege_machines" | "pets" | "builder_troops" | "spells">("heroes");
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -89,7 +90,7 @@ export default function PlayerPage() {
     }
   }, []);
 
-  async function performSearch(tag: string, tab?: "upgrades" | "heroes") {
+  async function performSearch(tag: string, tab?: "upgrades" | "buildings" | "heroes") {
     if (!tag.trim()) return;
     setLoading(true);
     setError(null);
@@ -133,6 +134,7 @@ export default function PlayerPage() {
 
   const tabs = profile ? [
     { key: "upgrades" as const, label: "Upgrades", count: pendingUpgrades.length, icon: <Hammer className="h-3.5 w-3.5 text-chart-5" /> },
+    { key: "buildings" as const, label: "Buildings", count: 0, icon: <Castle className="h-3.5 w-3.5 text-chart-2" /> },
     { key: "heroes" as const, label: "Heroes", count: profile.heroes.length, icon: <Crown className="h-3.5 w-3.5" /> },
     { key: "elixir_troops" as const, label: "Elixir Troops", count: homeTroops.filter(t => !DARK_TROOPS.includes(t.name) && !SIEGE_MACHINES.includes(t.name) && !PETS.includes(t.name)).length, icon: <Sword className="h-3.5 w-3.5" /> },
     { key: "dark_troops" as const, label: "Dark Troops", count: homeTroops.filter(t => DARK_TROOPS.includes(t.name)).length, icon: <Flame className="h-3.5 w-3.5" /> },
@@ -252,11 +254,13 @@ export default function PlayerPage() {
                 >
                   {tab.icon}
                   {tab.label}
-                  <span className={`ml-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                    activeTab === tab.key ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
-                  }`}>
-                    {tab.count}
-                  </span>
+                  {tab.key !== "buildings" && (
+                    <span className={`ml-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                      activeTab === tab.key ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
+                    }`}>
+                      {tab.count}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -308,6 +312,10 @@ export default function PlayerPage() {
                     })}
                   </div>
                 )}
+              </div>
+            ) : activeTab === "buildings" ? (
+              <div className="p-6">
+                <BuildingTracker profile={profile} />
               </div>
             ) : (
               <div className="overflow-x-auto">
