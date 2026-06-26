@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import crypto from 'crypto';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -10,7 +11,11 @@ export async function GET(request: Request) {
 
   const formatted = name.replace(/ /g, '_');
   
-  // Potential filenames for Clash of Clans units, prioritizing reliable GitHub raw sources
+  const getFandomUrl = (filename: string) => {
+    const hash = crypto.createHash('md5').update(filename).digest('hex');
+    return `https://static.wikia.nocookie.net/clashofclans/images/${hash[0]}/${hash.substring(0, 2)}/${filename}`;
+  };
+
   const tryUrls = [
     // GitHub Repo: Statscell/clash-assets
     `https://raw.githubusercontent.com/Statscell/clash-assets/main/troops/models/${formatted}.png`,
@@ -18,11 +23,16 @@ export async function GET(request: Request) {
     `https://raw.githubusercontent.com/Statscell/clash-assets/main/troops/models/${formatted}_Spell.png`,
     `https://raw.githubusercontent.com/Statscell/clash-assets/main/troops/icons/${formatted}_Spell.png`,
     
-    // Fallback to Fandom
+    // Direct Fandom Static CDN (Bypasses Cloudflare)
+    getFandomUrl(`Avatar_${formatted}.png`),
+    getFandomUrl(`${formatted}.png`),
+    getFandomUrl(`${formatted}_info.png`),
+    getFandomUrl(`${formatted}_1.png`),
+    
+    // Original Fandom API Fallbacks
     `https://clashofclans.fandom.com/wiki/Special:FilePath/${formatted}.png`,
     `https://clashofclans.fandom.com/wiki/Special:FilePath/${formatted}_info.png`,
-    `https://clashofclans.fandom.com/wiki/Special:FilePath/Avatar_${formatted}.png`,
-    `https://clashofclans.fandom.com/wiki/Special:FilePath/${formatted}_1.png`
+    `https://clashofclans.fandom.com/wiki/Special:FilePath/Avatar_${formatted}.png`
   ];
 
   for (const url of tryUrls) {
