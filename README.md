@@ -2,7 +2,7 @@
 
 <div align="center">
   <p><strong>ClashForge is a professional, full-stack Next.js and FastAPI application designed for Clash of Clans players and clan leaders.</strong></p>
-  <a href="YOUR_LIVE_LINK_HERE"><strong>🔴 View Live Demo</strong></a>
+  <a href=https://clash-forge-byu6.vercel.app/><strong>🔴 View Live Demo</strong></a>
 </div>
 
 <br />
