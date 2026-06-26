@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CLASH_DATA } from "@/lib/clash-data";
+import { CLASH_DATA, BUILDING_UNLOCK_TH } from "@/lib/clash-data";
 import { Hammer, Shield, Zap, Home, Minus, Plus, RefreshCw, CheckCircle2 } from "lucide-react";
 
 interface BuildingTrackerProps {
@@ -45,14 +45,19 @@ export function BuildingTracker({ profile }: BuildingTrackerProps) {
 
   const getImageUrl = (name: string) => `/api/image-proxy?name=${encodeURIComponent(name)}`;
 
-  const renderCategory = (title: string, icon: React.ReactNode, buildings: string[], colorClass: string) => {
+  const renderCategory = (title: string, icon: React.ReactNode, allBuildings: string[], colorClass: string) => {
+    // Filter buildings that are unlocked at or below the player's TH level
+    const unlockedBuildings = allBuildings.filter(b => (BUILDING_UNLOCK_TH[b] || 1) <= thLevel);
+    
+    if (unlockedBuildings.length === 0) return null;
+
     return (
       <div className="mb-8">
         <h3 className={`text-lg font-bold flex items-center gap-2 mb-4 ${colorClass}`}>
           {icon} {title}
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {buildings.map(building => {
+          {unlockedBuildings.map(building => {
             const count = buildingProgress[building] || 0;
             return (
               <div key={building} className="glass p-3 rounded-2xl border border-border/50 hover:border-primary/50 transition-all flex flex-col items-center group">

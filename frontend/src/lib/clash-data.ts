@@ -47,18 +47,62 @@ export const CLASH_DATA = {
       "Cannon", "Archer Tower", "Mortar", "Air Defense", "Wizard Tower",
       "Air Sweeper", "Hidden Tesla", "Bomb Tower", "X-Bow", "Inferno Tower",
       "Eagle Artillery", "Scattershot", "Builder's Hut", "Spell Tower", "Monolith",
-      "Multi-Archer Tower", "Ricochet Cannon"
+      "Multi-Archer Tower", "Ricochet Cannon", "Blast Bow"
     ],
     army: [
       "Army Camp", "Barracks", "Dark Barracks", "Laboratory",
-      "Spell Factory", "Dark Spell Factory", "Siege Workshop", "Pet House"
+      "Spell Factory", "Dark Spell Factory", "Siege Workshop", "Pet House",
+      "Blacksmith", "Hero Hall"
     ],
     resources: [
       "Gold Mine", "Elixir Collector", "Dark Elixir Drill",
       "Gold Storage", "Elixir Storage", "Dark Elixir Storage",
-      "Clan Castle", "Town Hall"
+      "Clan Castle"
     ]
   }
+};
+
+export const BUILDING_UNLOCK_TH: Record<string, number> = {
+  // Defenses
+  "Cannon": 1,
+  "Archer Tower": 2,
+  "Mortar": 3,
+  "Air Defense": 4,
+  "Wizard Tower": 5,
+  "Air Sweeper": 6,
+  "Hidden Tesla": 7,
+  "Bomb Tower": 8,
+  "X-Bow": 9,
+  "Inferno Tower": 10,
+  "Eagle Artillery": 11,
+  "Scattershot": 13,
+  "Spell Tower": 15,
+  "Monolith": 15,
+  "Multi-Archer Tower": 16,
+  "Ricochet Cannon": 16,
+  "Blast Bow": 18,
+  "Builder's Hut": 1,
+
+  // Army
+  "Army Camp": 1,
+  "Barracks": 1,
+  "Laboratory": 3,
+  "Spell Factory": 5,
+  "Dark Barracks": 7,
+  "Dark Spell Factory": 8,
+  "Blacksmith": 8,
+  "Hero Hall": 8,
+  "Siege Workshop": 12,
+  "Pet House": 14,
+
+  // Resources
+  "Gold Mine": 1,
+  "Elixir Collector": 1,
+  "Gold Storage": 1,
+  "Elixir Storage": 1,
+  "Dark Elixir Storage": 7,
+  "Dark Elixir Drill": 7,
+  "Clan Castle": 3
 };
 
 export const CLASH_DESCRIPTIONS: Record<string, string> = {

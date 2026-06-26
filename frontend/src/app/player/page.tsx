@@ -142,7 +142,7 @@ export default function PlayerPage() {
     { key: "pets" as const, label: "Pets", count: homeTroops.filter(t => PETS.includes(t.name)).length, icon: <Dog className="h-3.5 w-3.5" /> },
     { key: "builder_troops" as const, label: "Builder Troops", count: profile.troops.filter(t => t.village === "builderBase").length, icon: <Hammer className="h-3.5 w-3.5" /> },
     { key: "spells" as const, label: "Spells", count: profile.spells.length, icon: <FlaskConical className="h-3.5 w-3.5" /> },
-  ].filter(t => t.count > 0 || t.key === "upgrades") : [];
+  ].filter(t => t.count > 0 || t.key === "upgrades" || t.key === "buildings") : [];
 
   const activeItems = profile && activeTab !== "upgrades" ? (
     activeTab === "heroes" ? profile.heroes :
