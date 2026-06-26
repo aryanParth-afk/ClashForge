@@ -39,7 +39,7 @@ function UnitImage({ name }: { name: string }) {
 }
 
 export default function HomePage() {
-  const [activeCategory, setActiveCategory] = useState<CategoryKey | null>("elixir_troops");
+  const [activeCategory, setActiveCategory] = useState<CategoryKey | null>(null);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
 
   return (

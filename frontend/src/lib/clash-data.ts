@@ -188,147 +188,193 @@ export const TROOP_HOUSING_SPACE: Record<string, number> = {
   "Barbarian": 1, "Archer": 1, "Goblin": 1, "Giant": 5, "Wall Breaker": 2, "Balloon": 5,
   "Wizard": 4, "Healer": 14, "Dragon": 20, "P.E.K.K.A": 25, "Baby Dragon": 10, "Miner": 6,
   "Electro Dragon": 30, "Yeti": 18, "Dragon Rider": 25, "Electro Titan": 32, "Root Rider": 20,
-  "Thrower": 15, "Meteor Golem": 35, // custom 
+  "Thrower": 16, "Meteor Golem": 40, // custom 
 
   // Dark Troops
   "Minion": 2, "Hog Rider": 5, "Valkyrie": 8, "Golem": 30, "Witch": 12, "Lava Hound": 30,
-  "Bowler": 6, "Ice Golem": 15, "Headhunter": 6, "Apprentice Warden": 20, "Druid": 14,
-  "Furnace": 20, "Ruin Witch": 15, // custom
+  "Bowler": 6, "Ice Golem": 15, "Headhunter": 6, "Apprentice Warden": 20, "Druid": 16,
+  "Furnace": 18, "Ruin Witch": 8, // custom
 
   // Super Troops
   "Super Barbarian": 5, "Super Archer": 12, "Super Giant": 10, "Sneaky Goblin": 3, "Super Wall Breaker": 8,
   "Rocket Balloon": 8, "Super Wizard": 10, "Super Dragon": 40, "Inferno Dragon": 15, "Super Minion": 12,
   "Super Valkyrie": 20, "Super Witch": 40, "Ice Hound": 40, "Super Bowler": 30, "Super Miner": 24,
-  "Super Hog Rider": 12, "Super Yeti": 40
+  "Super Hog Rider": 12, "Super Yeti": 35
 };
 
 export const SPELL_HOUSING_SPACE: Record<string, number> = {
   "Lightning Spell": 1, "Healing Spell": 2, "Rage Spell": 2, "Jump Spell": 2,
   "Freeze Spell": 1, "Clone Spell": 3, "Invisibility Spell": 1, "Recall Spell": 2, "Revive Spell": 2,
   "Poison Spell": 1, "Earthquake Spell": 1, "Haste Spell": 1, "Skeleton Spell": 1,
-  "Bat Spell": 1, "Overgrowth Spell": 2, "Totem Spell": 2, "Ice Block Spell": 1
+  "Bat Spell": 1, "Overgrowth Spell": 2, "Totem Spell": 1, "Ice Block Spell": 1
 };
 
 export interface THCapacity {
   camp: number;
   spell: number;
   cc: number;
+  ccSpell: number;
 }
 
 // Map TH level to capacities
 export const TH_CAPACITIES: Record<number, THCapacity> = {
-  1: { camp: 20, spell: 0, cc: 0 },
-  2: { camp: 30, spell: 0, cc: 10 },
-  3: { camp: 70, spell: 0, cc: 10 },
-  4: { camp: 80, spell: 0, cc: 15 },
-  5: { camp: 135, spell: 1, cc: 15 },
-  6: { camp: 150, spell: 2, cc: 20 },
-  7: { camp: 200, spell: 6, cc: 20 },
-  8: { camp: 200, spell: 7, cc: 25 },
-  9: { camp: 220, spell: 9, cc: 30 },
-  10: { camp: 240, spell: 11, cc: 35 },
-  11: { camp: 260, spell: 11, cc: 35 },
-  12: { camp: 280, spell: 11, cc: 40 },
-  13: { camp: 300, spell: 11, cc: 45 },
-  14: { camp: 300, spell: 11, cc: 50 },
-  15: { camp: 320, spell: 11, cc: 50 },
-  16: { camp: 320, spell: 11, cc: 50 },
-  17: { camp: 340, spell: 13, cc: 55 },
-  18: { camp: 360, spell: 15, cc: 60 }
+  1: { camp: 20, spell: 0, cc: 0, ccSpell: 0 },
+  2: { camp: 30, spell: 0, cc: 10, ccSpell: 0 },
+  3: { camp: 70, spell: 0, cc: 10, ccSpell: 0 },
+  4: { camp: 80, spell: 0, cc: 15, ccSpell: 0 },
+  5: { camp: 135, spell: 1, cc: 15, ccSpell: 0 },
+  6: { camp: 150, spell: 2, cc: 20, ccSpell: 0 },
+  7: { camp: 200, spell: 6, cc: 20, ccSpell: 0 },
+  8: { camp: 200, spell: 7, cc: 25, ccSpell: 1 },
+  9: { camp: 220, spell: 9, cc: 30, ccSpell: 1 },
+  10: { camp: 240, spell: 11, cc: 35, ccSpell: 1 },
+  11: { camp: 260, spell: 11, cc: 35, ccSpell: 2 },
+  12: { camp: 280, spell: 11, cc: 40, ccSpell: 2 },
+  13: { camp: 300, spell: 11, cc: 45, ccSpell: 2 },
+  14: { camp: 300, spell: 11, cc: 50, ccSpell: 2 },
+  15: { camp: 320, spell: 11, cc: 50, ccSpell: 3 },
+  16: { camp: 320, spell: 11, cc: 50, ccSpell: 3 },
+  17: { camp: 340, spell: 13, cc: 55, ccSpell: 3 },
+  18: { camp: 360, spell: 15, cc: 60, ccSpell: 3 }
 };
+
+export interface HeroData {
+  name: string;
+  equipments: string[];
+}
+
+export const HEROES: HeroData[] = [
+  { name: "Barbarian King", equipments: ["Barbarian Puppet", "Rage Vial", "Earthquake Boots", "Vampstache", "Giant Gauntlet", "Spiky Ball", "Snake Bracelet"] },
+  { name: "Archer Queen", equipments: ["Archer Puppet", "Invisibility Vial", "Giant Arrow", "Healer Puppet", "Frozen Arrow", "Magic Mirror", "Action Figure", "Monolith Arrow"] },
+  { name: "Grand Warden", equipments: ["Eternal Tome", "Life Gem", "Rage Gem", "Healing Tome", "Fireball", "Heroic Torch", "LavaLoon Puppet"] },
+  { name: "Royal Champion", equipments: ["Royal Gem", "Seeking Shield", "Haste Vial", "Hog Rider Puppet", "Rocket Spear", "Electro Boots"] },
+  { name: "Minion Prince", equipments: ["Meteor Staff", "Dark Crown"] },
+  { name: "Dragon Duke", equipments: ["Fire Heart", "Rocket Backpack"] }
+];
 
 export interface MetaArmy {
   id: string;
   name: string;
-  minTh: number;
+  thLevel: number;
   description: string;
   troops: { name: string; count: number }[];
   spells: { name: string; count: number }[];
+  ccTroops?: { name: string; count: number }[];
+  ccSpells?: { name: string; count: number }[];
+  heroes?: { name: string; equipments: string[] }[];
 }
 
 export const META_ARMIES: MetaArmy[] = [
+  // TH7 - 200 Camp, 6 Spell
   {
-    id: "edrag_spam",
-    name: "Edrag Spam",
-    minTh: 11,
-    description: "A highly popular and easy-to-use air attack. Uses Electro Dragons to chain lightning through clustered bases.",
-    troops: [
-      { name: "Electro Dragon", count: 7 },
-      { name: "Balloon", count: 10 }
-    ],
-    spells: [
-      { name: "Rage Spell", count: 3 },
-      { name: "Freeze Spell", count: 5 }
-    ]
+    id: "th7_dragons", name: "Mass Dragons", thLevel: 7,
+    description: "The classic TH7 strategy. Zap one air defense and overwhelm the rest with Dragons.",
+    troops: [{ name: "Dragon", count: 10 }],
+    spells: [{ name: "Lightning Spell", count: 6 }]
+  },
+  // TH8 - 200 Camp, 7 Spell
+  {
+    id: "th8_gowipe", name: "GoWiPe", thLevel: 8,
+    description: "A heavy ground smash. Golems tank, Wall Breakers open compartments, Wizards and Pekkas destroy everything.",
+    troops: [{ name: "Golem", count: 2 }, { name: "P.E.K.K.A", count: 3 }, { name: "Wizard", count: 13 }, { name: "Wall Breaker", count: 6 }, { name: "Archer", count: 1 }],
+    spells: [{ name: "Healing Spell", count: 1 }, { name: "Rage Spell", count: 2 }, { name: "Poison Spell", count: 1 }]
+  },
+  // TH9 - 220 Camp, 9 Spell
+  {
+    id: "th9_qc_lalo", name: "Queen Charge LaLo", thLevel: 9,
+    description: "Queen Charge takes out key defenses, followed by surgical Lava Hound and Balloon deployment.",
+    troops: [{ name: "Healer", count: 4 }, { name: "Lava Hound", count: 2 }, { name: "Balloon", count: 16 }, { name: "Wall Breaker", count: 5 }, { name: "Minion", count: 6 }, { name: "Archer", count: 2 }],
+    spells: [{ name: "Rage Spell", count: 2 }, { name: "Haste Spell", count: 3 }, { name: "Poison Spell", count: 2 }]
+  },
+  // TH10 - 240 Camp, 11 Spell
+  {
+    id: "th10_zap_witches", name: "Zap Witches", thLevel: 10,
+    description: "Zap out the Inferno Towers, then send a wall of Golems and Witches.",
+    troops: [{ name: "Golem", count: 3 }, { name: "Witch", count: 12 }, { name: "Wall Breaker", count: 3 }],
+    spells: [{ name: "Lightning Spell", count: 8 }, { name: "Earthquake Spell", count: 2 }, { name: "Freeze Spell", count: 1 }]
+  },
+  // TH11 - 260 Camp, 11 Spell
+  {
+    id: "th11_edrag", name: "Edrag Spam", thLevel: 11,
+    description: "Simple but devastating. Chain lightning through clustered bases.",
+    troops: [{ name: "Electro Dragon", count: 7 }, { name: "Balloon", count: 10 }],
+    spells: [{ name: "Rage Spell", count: 3 }, { name: "Freeze Spell", count: 5 }]
   },
   {
-    id: "qc_lalo",
-    name: "Queen Charge LaLo",
-    minTh: 9,
-    description: "A high-skill attack that uses a Queen Charge to take out key defenses, followed by a surgical Lava Hound and Balloon sweep.",
-    troops: [
-      { name: "Healer", count: 5 },
-      { name: "Lava Hound", count: 2 },
-      { name: "Balloon", count: 16 },
-      { name: "Wall Breaker", count: 5 },
-      { name: "Minion", count: 10 }
-    ],
-    spells: [
-      { name: "Rage Spell", count: 2 },
-      { name: "Haste Spell", count: 3 },
-      { name: "Freeze Spell", count: 2 }
-    ]
+    id: "th11_qc_hybrid", name: "QC Hybrid", thLevel: 11,
+    description: "Queen Charge combined with a massive pack of Miners and Hog Riders.",
+    troops: [{ name: "Healer", count: 5 }, { name: "Miner", count: 15 }, { name: "Hog Rider", count: 15 }, { name: "Wall Breaker", count: 5 }, { name: "Balloon", count: 3 }],
+    spells: [{ name: "Healing Spell", count: 2 }, { name: "Rage Spell", count: 2 }, { name: "Freeze Spell", count: 2 }, { name: "Poison Spell", count: 1 }]
+  },
+  // TH12 - 280 Camp, 11 Spell
+  {
+    id: "th12_yeti_smash", name: "Yeti Smash", thLevel: 12,
+    description: "Use Wardens aura with Yetis and Witches to completely overrun the base.",
+    troops: [{ name: "Healer", count: 4 }, { name: "Yeti", count: 7 }, { name: "Witch", count: 6 }, { name: "Bowler", count: 3 }, { name: "Wall Breaker", count: 4 }],
+    spells: [{ name: "Rage Spell", count: 2 }, { name: "Jump Spell", count: 2 }, { name: "Freeze Spell", count: 2 }, { name: "Poison Spell", count: 1 }]
   },
   {
-    id: "gowipe",
-    name: "GoWiPe",
-    minTh: 8,
-    description: "The classic ground smash attack! Uses Golems to tank, while Wizards and P.E.K.K.As destroy the core.",
-    troops: [
-      { name: "Golem", count: 2 },
-      { name: "P.E.K.K.A", count: 3 },
-      { name: "Wizard", count: 15 },
-      { name: "Wall Breaker", count: 5 }
-    ],
-    spells: [
-      { name: "Healing Spell", count: 1 },
-      { name: "Rage Spell", count: 2 },
-      { name: "Poison Spell", count: 1 }
+    id: "th12_edrag", name: "Edrag Spam", thLevel: 12,
+    description: "Bigger army camps mean more loons to support the Edrags.",
+    troops: [{ name: "Electro Dragon", count: 8 }, { name: "Balloon", count: 8 }],
+    spells: [{ name: "Rage Spell", count: 3 }, { name: "Freeze Spell", count: 5 }]
+  },
+  // TH13 - 300 Camp, 11 Spell
+  {
+    id: "th13_qc_hybrid", name: "QC Hybrid", thLevel: 13,
+    description: "The Hybrid shines at TH13 against the Scattershots.",
+    troops: [{ name: "Healer", count: 5 }, { name: "Miner", count: 18 }, { name: "Hog Rider", count: 17 }, { name: "Wall Breaker", count: 7 }, { name: "Balloon", count: 4 }, { name: "Archer", count: 3 }],
+    spells: [{ name: "Healing Spell", count: 2 }, { name: "Rage Spell", count: 2 }, { name: "Freeze Spell", count: 2 }, { name: "Poison Spell", count: 1 }]
+  },
+  // TH14 - 300 Camp, 11 Spell
+  {
+    id: "th14_super_bowler", name: "Super Bowler Smash", thLevel: 14,
+    description: "Keep Super Bowlers alive with Healers and Rage spells to bounce rocks through the core.",
+    troops: [{ name: "Healer", count: 4 }, { name: "Super Bowler", count: 4 }, { name: "Ice Golem", count: 3 }, { name: "Witch", count: 4 }, { name: "Balloon", count: 3 }, { name: "Wall Breaker", count: 8 }],
+    spells: [{ name: "Rage Spell", count: 3 }, { name: "Jump Spell", count: 1 }, { name: "Freeze Spell", count: 2 }, { name: "Poison Spell", count: 1 }]
+  },
+  // TH15 - 320 Camp, 11 Spell
+  {
+    id: "th15_zap_titans", name: "Zap Titans", thLevel: 15,
+    description: "Electro Titans naturally deal with CC troops and skeletons while smashing the base.",
+    troops: [{ name: "Electro Titan", count: 5 }, { name: "Healer", count: 5 }, { name: "Ice Golem", count: 2 }, { name: "Apprentice Warden", count: 1 }, { name: "Balloon", count: 4 }, { name: "Wall Breaker", count: 6 }, { name: "Minion", count: 4 }],
+    spells: [{ name: "Lightning Spell", count: 6 }, { name: "Earthquake Spell", count: 1 }, { name: "Rage Spell", count: 1 }, { name: "Freeze Spell", count: 2 }]
+  },
+  // TH16 - 320 Camp, 11 Spell
+  {
+    id: "th16_root_riders", name: "Root Rider Spam", thLevel: 16,
+    description: "Root Riders break walls instantly, allowing Valkyries or Druids to sweep the base.",
+    troops: [{ name: "Root Rider", count: 9 }, { name: "Valkyrie", count: 9 }, { name: "Apprentice Warden", count: 1 }, { name: "Druid", count: 2 }, { name: "Balloon", count: 3 }, { name: "Archer", count: 1 }],
+    spells: [{ name: "Overgrowth Spell", count: 2 }, { name: "Rage Spell", count: 2 }, { name: "Freeze Spell", count: 2 }, { name: "Poison Spell", count: 1 }],
+    heroes: [
+      { name: "Barbarian King", equipments: ["Giant Gauntlet", "Spiky Ball"] },
+      { name: "Archer Queen", equipments: ["Action Figure", "Magic Mirror"] },
+      { name: "Grand Warden", equipments: ["Eternal Tome", "Healing Tome"] },
+      { name: "Royal Champion", equipments: ["Haste Vial", "Electro Boots"] }
     ]
   },
+  // TH17 - 340 Camp, 13 Spell
   {
-    id: "qc_hybrid",
-    name: "Queen Charge Hybrid",
-    minTh: 10,
-    description: "A devastating combination of Miners and Hog Riders, spearheaded by a Queen Charge to create pathing.",
-    troops: [
-      { name: "Healer", count: 5 },
-      { name: "Miner", count: 14 },
-      { name: "Hog Rider", count: 13 },
-      { name: "Balloon", count: 2 },
-      { name: "Wall Breaker", count: 5 }
-    ],
-    spells: [
-      { name: "Healing Spell", count: 2 },
-      { name: "Rage Spell", count: 2 },
-      { name: "Freeze Spell", count: 1 },
-      { name: "Poison Spell", count: 1 }
-    ]
+    id: "th17_root_valk", name: "Root Rider Valks", thLevel: 17,
+    description: "Expanded camps allow for even more devastating Root Rider smashes.",
+    troops: [{ name: "Root Rider", count: 10 }, { name: "Valkyrie", count: 8 }, { name: "Druid", count: 2 }, { name: "Apprentice Warden", count: 1 }, { name: "Balloon", count: 4 }, { name: "Minion", count: 2 }],
+    spells: [{ name: "Overgrowth Spell", count: 2 }, { name: "Rage Spell", count: 3 }, { name: "Freeze Spell", count: 2 }, { name: "Poison Spell", count: 1 }]
   },
+  // TH18 - 360 Camp, 15 Spell
   {
-    id: "zap_witches",
-    name: "Zap Witches",
-    minTh: 10,
-    description: "Uses Lightning Spells and Earthquake to destroy Inferno Towers, allowing Golems and Witches to overwhelm the base with skeletons.",
-    troops: [
-      { name: "Golem", count: 3 },
-      { name: "Witch", count: 12 },
-      { name: "Wall Breaker", count: 3 }
-    ],
-    spells: [
-      { name: "Lightning Spell", count: 8 },
-      { name: "Earthquake Spell", count: 2 },
-      { name: "Freeze Spell", count: 1 }
+    id: "th18_mega_smash", name: "TH18 Mega Smash", thLevel: 18,
+    description: "An overwhelming ground attack leveraging the massive TH18 camp space.",
+    troops: [{ name: "Root Rider", count: 12 }, { name: "Electro Titan", count: 2 }, { name: "Valkyrie", count: 5 }, { name: "Druid", count: 1 }],
+    spells: [{ name: "Overgrowth Spell", count: 2 }, { name: "Rage Spell", count: 4 }, { name: "Freeze Spell", count: 2 }, { name: "Poison Spell", count: 1 }],
+    ccTroops: [{ name: "Root Rider", count: 2 }, { name: "Valkyrie", count: 2 }, { name: "Wall Breaker", count: 2 }],
+    ccSpells: [{ name: "Rage Spell", count: 1 }, { name: "Freeze Spell", count: 1 }],
+    heroes: [
+      { name: "Barbarian King", equipments: ["Giant Gauntlet", "Spiky Ball"] },
+      { name: "Archer Queen", equipments: ["Action Figure", "Monolith Arrow"] },
+      { name: "Grand Warden", equipments: ["Eternal Tome", "Heroic Torch"] },
+      { name: "Royal Champion", equipments: ["Haste Vial", "Electro Boots"] },
+      { name: "Minion Prince", equipments: ["Meteor Staff", "Dark Crown"] },
+      { name: "Dragon Duke", equipments: ["Fire Heart", "Rocket Backpack"] }
     ]
   }
 ];

@@ -19,7 +19,6 @@ import {
   Flame
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArmyBuilder } from "@/components/ArmyBuilder";
 
 const DARK_TROOPS = [
   "Minion", "Hog Rider", "Valkyrie", "Golem", "Witch", "Lava Hound", 
@@ -76,7 +75,7 @@ export default function PlayerPage() {
   const [profile, setProfile] = useState<PlayerProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"upgrades" | "army_builder" | "heroes" | "elixir_troops" | "dark_troops" | "siege_machines" | "pets" | "builder_troops" | "spells">("heroes");
+  const [activeTab, setActiveTab] = useState<"upgrades" | "heroes" | "elixir_troops" | "dark_troops" | "siege_machines" | "pets" | "builder_troops" | "spells">("heroes");
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -134,7 +133,6 @@ export default function PlayerPage() {
 
   const tabs = profile ? [
     { key: "upgrades" as const, label: "Upgrades", count: pendingUpgrades.length, icon: <Hammer className="h-3.5 w-3.5 text-chart-5" /> },
-    { key: "army_builder" as const, label: "Army Builder", count: 0, icon: <Sword className="h-3.5 w-3.5 text-primary" /> },
     { key: "heroes" as const, label: "Heroes", count: profile.heroes.length, icon: <Crown className="h-3.5 w-3.5" /> },
     { key: "elixir_troops" as const, label: "Elixir Troops", count: homeTroops.filter(t => !DARK_TROOPS.includes(t.name) && !SIEGE_MACHINES.includes(t.name) && !PETS.includes(t.name)).length, icon: <Sword className="h-3.5 w-3.5" /> },
     { key: "dark_troops" as const, label: "Dark Troops", count: homeTroops.filter(t => DARK_TROOPS.includes(t.name)).length, icon: <Flame className="h-3.5 w-3.5" /> },
@@ -142,9 +140,9 @@ export default function PlayerPage() {
     { key: "pets" as const, label: "Pets", count: homeTroops.filter(t => PETS.includes(t.name)).length, icon: <Dog className="h-3.5 w-3.5" /> },
     { key: "builder_troops" as const, label: "Builder Troops", count: profile.troops.filter(t => t.village === "builderBase").length, icon: <Hammer className="h-3.5 w-3.5" /> },
     { key: "spells" as const, label: "Spells", count: profile.spells.length, icon: <FlaskConical className="h-3.5 w-3.5" /> },
-  ].filter(t => t.count > 0 || t.key === "upgrades" || t.key === "army_builder") : [];
+  ].filter(t => t.count > 0 || t.key === "upgrades") : [];
 
-  const activeItems = profile && activeTab !== "upgrades" && activeTab !== "army_builder" ? (
+  const activeItems = profile && activeTab !== "upgrades" ? (
     activeTab === "heroes" ? profile.heroes :
     activeTab === "elixir_troops" ? homeTroops.filter(t => !DARK_TROOPS.includes(t.name) && !SIEGE_MACHINES.includes(t.name) && !PETS.includes(t.name)) :
     activeTab === "dark_troops" ? homeTroops.filter(t => DARK_TROOPS.includes(t.name)) :
@@ -264,9 +262,7 @@ export default function PlayerPage() {
             </div>
 
             {/* Content Area */}
-            {activeTab === "army_builder" ? (
-              <ArmyBuilder profile={profile} />
-            ) : activeTab === "upgrades" ? (
+            {activeTab === "upgrades" ? (
               <div className="p-6 bg-background/10">
                 {pendingUpgrades.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
