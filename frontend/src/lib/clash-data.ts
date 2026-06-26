@@ -105,6 +105,50 @@ export const BUILDING_UNLOCK_TH: Record<string, number> = {
   "Clan Castle": 3
 };
 
+// Index 0 is unused. Indices 1-18 correspond to Town Hall levels 1-18.
+export const BUILDING_MAX_COUNTS: Record<string, number[]> = {
+  // Defenses
+  "Cannon":             [0, 2, 2, 2, 2, 3, 3, 5, 5, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7],
+  "Archer Tower":       [0, 0, 1, 1, 2, 3, 3, 4, 5, 6, 7, 8, 8, 8, 8, 8, 8, 8, 8],
+  "Mortar":             [0, 0, 0, 1, 1, 1, 2, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+  "Air Defense":        [0, 0, 0, 0, 1, 1, 2, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+  "Wizard Tower":       [0, 0, 0, 0, 0, 1, 2, 2, 3, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5],
+  "Air Sweeper":        [0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+  "Hidden Tesla":       [0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5],
+  "Bomb Tower":         [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+  "X-Bow":              [0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 4, 4, 4, 4, 4, 4, 4],
+  "Inferno Tower":      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 3, 3, 3, 3, 3, 3, 3],
+  "Eagle Artillery":    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
+  "Scattershot":        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2],
+  "Spell Tower":        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2],
+  "Monolith":           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+  "Multi-Archer Tower": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2],
+  "Ricochet Cannon":    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2],
+  "Blast Bow":          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+  "Builder's Hut":      [0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5], // Technically 5 total usually
+
+  // Army
+  "Army Camp":          [0, 1, 1, 2, 2, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+  "Barracks":           [0, 1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+  "Dark Barracks":      [0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+  "Laboratory":         [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  "Spell Factory":      [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  "Dark Spell Factory": [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  "Siege Workshop":     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1],
+  "Pet House":          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
+  "Blacksmith":         [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  "Hero Hall":          [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+
+  // Resources
+  "Gold Mine":          [0, 1, 2, 3, 4, 5, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+  "Elixir Collector":   [0, 1, 2, 3, 4, 5, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+  "Dark Elixir Drill":  [0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+  "Gold Storage":       [0, 1, 1, 2, 2, 2, 2, 2, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+  "Elixir Storage":     [0, 1, 1, 2, 2, 2, 2, 2, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+  "Dark Elixir Storage":[0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  "Clan Castle":        [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+};
+
 export const CLASH_DESCRIPTIONS: Record<string, string> = {
   // Heroes
   "Barbarian King": "The Barbarian King is the toughest and meanest barbarian in all the realm, whose appetite for Dark Elixir has caused him to grow to a giant size.",

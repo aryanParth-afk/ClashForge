@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CLASH_DATA, BUILDING_UNLOCK_TH } from "@/lib/clash-data";
+import { CLASH_DATA, BUILDING_UNLOCK_TH, BUILDING_MAX_COUNTS } from "@/lib/clash-data";
 import { Hammer, Shield, Zap, Home, Minus, Plus, RefreshCw, CheckCircle2 } from "lucide-react";
 
 interface BuildingTrackerProps {
@@ -28,7 +28,8 @@ export function BuildingTracker({ profile }: BuildingTrackerProps) {
   const updateProgress = (building: string, delta: number) => {
     setBuildingProgress(prev => {
       const current = prev[building] || 0;
-      const next = Math.max(0, current + delta);
+      const maxAllowed = BUILDING_MAX_COUNTS[building]?.[Math.min(thLevel, 18)] || 1;
+      const next = Math.max(0, Math.min(current + delta, maxAllowed));
       
       const newProgress = { ...prev, [building]: next };
       localStorage.setItem(storageKey, JSON.stringify(newProgress));
@@ -59,20 +60,28 @@ export function BuildingTracker({ profile }: BuildingTrackerProps) {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {unlockedBuildings.map(building => {
             const count = buildingProgress[building] || 0;
+            const maxAllowed = BUILDING_MAX_COUNTS[building]?.[Math.min(thLevel, 18)] || 1;
+            const isMaxed = count >= maxAllowed;
+
             return (
-              <div key={building} className="glass p-3 rounded-2xl border border-border/50 hover:border-primary/50 transition-all flex flex-col items-center group">
-                <div className="relative w-16 h-16 mb-2">
-                  <img src={getImageUrl(building)} alt={building} className="w-full h-full object-contain drop-shadow-md group-hover:scale-110 transition-transform" />
-                  {count > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full shadow-lg">
-                      {count}
-                    </span>
-                  )}
+              <div key={building} className={`glass p-3 rounded-2xl border transition-all flex flex-col items-center group relative overflow-hidden ${isMaxed ? 'border-primary/50 shadow-[0_0_15px_rgba(251,146,60,0.1)]' : 'border-border/50 hover:border-primary/50'}`}>
+                {isMaxed && (
+                  <div className="absolute inset-0 bg-primary/5 pointer-events-none" />
+                )}
+                
+                <div className="relative w-16 h-16 mb-2 mt-2">
+                  <img src={getImageUrl(building)} alt={building} className={`w-full h-full object-contain drop-shadow-md transition-transform ${isMaxed ? 'scale-105' : 'group-hover:scale-110'}`} />
+                  
+                  <div className={`absolute -top-3 -right-3 text-xs font-bold px-2 py-0.5 flex items-center justify-center rounded-full shadow-lg ${isMaxed ? 'bg-primary text-primary-foreground' : 'bg-background border border-border text-foreground'}`}>
+                    {count} <span className={`text-[10px] ml-0.5 ${isMaxed ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>/ {maxAllowed}</span>
+                  </div>
                 </div>
-                <div className="text-xs font-semibold text-center h-8 flex items-center justify-center mb-2">
+                
+                <div className="text-xs font-semibold text-center h-8 flex items-center justify-center mb-2 z-10">
                   {building}
                 </div>
-                <div className="flex items-center gap-2 mt-auto w-full justify-center">
+                
+                <div className="flex items-center gap-2 mt-auto w-full justify-center z-10">
                   <button 
                     onClick={() => updateProgress(building, -1)}
                     disabled={count === 0}
@@ -82,7 +91,8 @@ export function BuildingTracker({ profile }: BuildingTrackerProps) {
                   </button>
                   <button 
                     onClick={() => updateProgress(building, 1)}
-                    className="w-8 h-8 flex items-center justify-center bg-background rounded-lg border border-border transition-colors hover:bg-primary/20 hover:text-primary hover:border-primary"
+                    disabled={isMaxed}
+                    className="w-8 h-8 flex items-center justify-center bg-background rounded-lg border border-border disabled:opacity-50 transition-colors hover:bg-primary/20 hover:text-primary hover:border-primary"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
