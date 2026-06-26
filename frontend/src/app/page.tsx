@@ -18,7 +18,7 @@ const CATEGORY_CONFIG: Record<CategoryKey, { label: string; icon: React.ReactNod
 };
 
 export default function HomePage() {
-  const [activeCategory, setActiveCategory] = useState<CategoryKey>("elixir_troops");
+  const [activeCategory, setActiveCategory] = useState<CategoryKey | null>("elixir_troops");
 
   return (
     <main className="relative flex flex-col w-full">
@@ -87,42 +87,49 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="glass rounded-2xl border border-border/50 overflow-hidden shadow-2xl">
-            {/* Category Tabs */}
-            <div className="flex border-b border-border overflow-x-auto bg-background/40 p-2 gap-2 hide-scrollbar">
-              {(Object.keys(CATEGORY_CONFIG) as CategoryKey[]).map((key) => {
-                const config = CATEGORY_CONFIG[key];
-                const isActive = activeCategory === key;
-                return (
+          <div className="flex flex-col gap-4">
+            {(Object.keys(CATEGORY_CONFIG) as CategoryKey[]).map((key) => {
+              const config = CATEGORY_CONFIG[key];
+              const isActive = activeCategory === key;
+              
+              return (
+                <div key={key} className={`glass rounded-2xl border transition-all duration-300 ${isActive ? "border-primary/50 shadow-lg shadow-primary/5" : "border-border/50 shadow-sm"}`}>
                   <button
-                    key={key}
-                    onClick={() => setActiveCategory(key)}
-                    className={`flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
+                    onClick={() => setActiveCategory(isActive ? null : key)}
+                    className={`w-full flex items-center justify-between p-6 transition-colors rounded-2xl ${
                       isActive 
-                        ? "bg-primary text-primary-foreground shadow-md" 
-                        : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                        ? "bg-primary/5 text-foreground" 
+                        : "hover:bg-accent/40 text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    {config.icon}
-                    {config.label}
+                    <div className="flex items-center gap-4">
+                      <div className={`p-3 rounded-xl transition-colors ${isActive ? "bg-primary text-primary-foreground shadow-md" : "bg-background border border-border"}`}>
+                        {config.icon}
+                      </div>
+                      <span className="text-xl font-bold tracking-tight">{config.label}</span>
+                    </div>
+                    <ChevronDown className={`w-6 h-6 transition-transform duration-300 ${isActive ? "rotate-180 text-primary" : ""}`} />
                   </button>
-                );
-              })}
-            </div>
 
-            {/* Items Grid */}
-            <div className="p-8 bg-background/10">
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {CLASH_DATA[activeCategory].map((item, i) => (
-                  <div 
-                    key={i} 
-                    className="flex items-center justify-center text-center p-4 rounded-xl border border-border/40 bg-background/50 hover:bg-accent/30 hover:border-primary/40 transition-all cursor-default group"
-                  >
-                    <span className="font-semibold text-sm group-hover:text-primary transition-colors">{item}</span>
+                  <div className={`grid transition-all duration-300 ease-in-out ${isActive ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
+                    <div className="overflow-hidden">
+                      <div className="p-6 bg-background/20 border-t border-border/30 rounded-b-2xl">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                          {CLASH_DATA[key].map((item, i) => (
+                            <div 
+                              key={i} 
+                              className="flex items-center justify-center text-center p-3 rounded-xl border border-border/40 bg-background/50 hover:bg-accent/40 hover:border-primary/40 hover:-translate-y-0.5 transition-all cursor-default group shadow-sm"
+                            >
+                              <span className="font-semibold text-sm group-hover:text-primary transition-colors">{item}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
+                </div>
+              );
+            })}
           </div>
 
         </div>
