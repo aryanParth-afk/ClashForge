@@ -1,6 +1,6 @@
 "use client";
 
-import { Swords, ArrowRight, Shield, Zap, ChevronDown, Sword, Flame, ShieldAlert, Dog, FlaskConical, Crown } from "lucide-react";
+import { Swords, ArrowRight, Shield, Zap, ChevronDown, Sword, Flame, ShieldAlert, Dog, FlaskConical, Crown, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { CLASH_DATA, CategoryKey } from "@/lib/clash-data";
@@ -17,8 +17,31 @@ const CATEGORY_CONFIG: Record<CategoryKey, { label: string; icon: React.ReactNod
   spells: { label: "Spells", icon: <FlaskConical className="w-4 h-4" /> }
 };
 
+function getUnitImageUrl(name: string) {
+  const formatted = name.replace(/ /g, '_');
+  return `https://clashofclans.fandom.com/wiki/Special:FilePath/${formatted}.png`;
+}
+
+function UnitImage({ name }: { name: string }) {
+  const [error, setError] = useState(false);
+  
+  if (error) {
+    return <span className="text-4xl font-black text-primary/50">{name.substring(0, 2).toUpperCase()}</span>;
+  }
+  
+  return (
+    <img 
+      src={getUnitImageUrl(name)} 
+      alt={name}
+      className="w-full h-full object-contain drop-shadow-2xl scale-110"
+      onError={() => setError(true)}
+    />
+  );
+}
+
 export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState<CategoryKey | null>("elixir_troops");
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
 
   return (
     <main className="relative flex flex-col w-full">
@@ -116,12 +139,13 @@ export default function HomePage() {
                       <div className="p-6 bg-background/20 border-t border-border/30 rounded-b-2xl">
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                           {CLASH_DATA[key].map((item, i) => (
-                            <div 
+                            <button 
                               key={i} 
-                              className="flex items-center justify-center text-center p-3 rounded-xl border border-border/40 bg-background/50 hover:bg-accent/40 hover:border-primary/40 hover:-translate-y-0.5 transition-all cursor-default group shadow-sm"
+                              onClick={() => setSelectedItem(item)}
+                              className="flex items-center justify-center text-center p-3 rounded-xl border border-border/40 bg-background/50 hover:bg-accent/40 hover:border-primary/40 hover:-translate-y-0.5 transition-all cursor-pointer group shadow-sm"
                             >
                               <span className="font-semibold text-sm group-hover:text-primary transition-colors">{item}</span>
-                            </div>
+                            </button>
                           ))}
                         </div>
                       </div>
@@ -134,6 +158,33 @@ export default function HomePage() {
 
         </div>
       </section>
+
+      {/* ── Unit Modal ── */}
+      {selectedItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+          <div 
+            className="absolute inset-0 bg-background/80 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
+            onClick={() => setSelectedItem(null)}
+          ></div>
+          <div className="relative w-full max-w-sm glass rounded-3xl border border-border/50 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <button 
+              onClick={() => setSelectedItem(null)}
+              className="absolute top-4 right-4 p-2 rounded-full bg-background/50 hover:bg-background transition-colors z-10"
+            >
+              <X className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+            </button>
+            <div className="p-8 flex flex-col items-center text-center">
+              <div className="relative w-32 h-32 mb-6 flex items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-chart-4/20 border border-primary/20 shadow-[0_0_30px_rgba(45,212,191,0.2)]">
+                <UnitImage name={selectedItem} />
+              </div>
+              <h3 className="text-2xl font-bold tracking-tight mb-2">{selectedItem}</h3>
+              <p className="text-sm text-muted-foreground">
+                Clash of Clans Unit
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
