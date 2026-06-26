@@ -18,8 +18,7 @@ const CATEGORY_CONFIG: Record<CategoryKey, { label: string; icon: React.ReactNod
 };
 
 function getUnitImageUrl(name: string) {
-  const formatted = name.replace(/ /g, '_');
-  return `https://clashofclans.fandom.com/wiki/Special:FilePath/${formatted}.png`;
+  return `/api/image-proxy?name=${encodeURIComponent(name)}`;
 }
 
 function UnitImage({ name }: { name: string }) {
