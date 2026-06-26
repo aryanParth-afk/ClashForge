@@ -10,8 +10,15 @@ export async function GET(request: Request) {
 
   const formatted = name.replace(/ /g, '_');
   
-  // Potential Fandom filenames for Clash of Clans units
+  // Potential filenames for Clash of Clans units, prioritizing reliable GitHub raw sources
   const tryUrls = [
+    // GitHub Repo: Statscell/clash-assets
+    `https://raw.githubusercontent.com/Statscell/clash-assets/main/troops/models/${formatted}.png`,
+    `https://raw.githubusercontent.com/Statscell/clash-assets/main/troops/icons/${formatted}.png`,
+    `https://raw.githubusercontent.com/Statscell/clash-assets/main/troops/models/${formatted}_Spell.png`,
+    `https://raw.githubusercontent.com/Statscell/clash-assets/main/troops/icons/${formatted}_Spell.png`,
+    
+    // Fallback to Fandom
     `https://clashofclans.fandom.com/wiki/Special:FilePath/${formatted}.png`,
     `https://clashofclans.fandom.com/wiki/Special:FilePath/${formatted}_info.png`,
     `https://clashofclans.fandom.com/wiki/Special:FilePath/Avatar_${formatted}.png`,
@@ -30,7 +37,6 @@ export async function GET(request: Request) {
 
       const contentType = res.headers.get('content-type') || '';
       
-      // Fandom sometimes returns a 200 OK generic HTML page instead of an image
       if (res.ok && contentType.includes('image')) {
         const buffer = await res.arrayBuffer();
         return new NextResponse(buffer, {
