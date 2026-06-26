@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Sparkles, Minus, Plus, Trash2, Crosshair, Castle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Sparkles, Minus, Plus, Trash2, Crosshair, Castle, Save, Share2, Check, Download } from "lucide-react";
 import { 
   TH_CAPACITIES, 
   META_ARMIES, 
@@ -10,6 +10,17 @@ import {
   CLASH_DATA,
   HEROES
 } from "@/lib/clash-data";
+
+interface SavedArmy {
+  id: string;
+  name: string;
+  thLevel: number;
+  troops: Record<string, number>;
+  spells: Record<string, number>;
+  ccTroops: Record<string, number>;
+  ccSpells: Record<string, number>;
+  heroes: Record<string, string[]>;
+}
 
 interface ArmyBuilderProps {
   profile: any;
@@ -27,6 +38,38 @@ export function ArmyBuilder({ profile }: ArmyBuilderProps) {
   const [armyCcTroops, setArmyCcTroops] = useState<Record<string, number>>({});
   const [armyCcSpells, setArmyCcSpells] = useState<Record<string, number>>({});
   const [selectedHeroes, setSelectedHeroes] = useState<Record<string, string[]>>({});
+
+  const [savedArmies, setSavedArmies] = useState<SavedArmy[]>([]);
+  const [armyNameInput, setArmyNameInput] = useState("");
+  const [shareCopied, setShareCopied] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    const saved = localStorage.getItem("clashforge_saved_armies");
+    if (saved) {
+      try {
+        setSavedArmies(JSON.parse(saved));
+      } catch (e) {}
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const sharedData = params.get('shared_army');
+    if (sharedData) {
+      try {
+        const decoded = JSON.parse(atob(sharedData));
+        if (decoded.troops) setArmyTroops(decoded.troops);
+        if (decoded.spells) setArmySpells(decoded.spells);
+        if (decoded.ccTroops) setArmyCcTroops(decoded.ccTroops);
+        if (decoded.ccSpells) setArmyCcSpells(decoded.ccSpells);
+        if (decoded.heroes) setSelectedHeroes(decoded.heroes);
+        
+        window.history.replaceState({}, '', window.location.pathname + "?tag=" + encodeURIComponent(profile.tag.replace('#', '')));
+      } catch (e) {
+        console.error("Failed to parse shared army", e);
+      }
+    }
+  }, [profile.tag]);
 
   const availableMetaArmies = META_ARMIES.filter(a => a.thLevel === thLevel);
 
@@ -139,6 +182,57 @@ export function ArmyBuilder({ profile }: ArmyBuilderProps) {
         return { ...prev, [heroName]: [...currentEquips, equipment] };
       }
     });
+  };
+
+  const handleSaveArmy = () => {
+    if (!armyNameInput.trim()) return;
+    const newSaved: SavedArmy = {
+      id: Date.now().toString(),
+      name: armyNameInput.trim(),
+      thLevel,
+      troops: armyTroops,
+      spells: armySpells,
+      ccTroops: armyCcTroops,
+      ccSpells: armyCcSpells,
+      heroes: selectedHeroes
+    };
+    
+    const updated = [...savedArmies, newSaved];
+    setSavedArmies(updated);
+    localStorage.setItem("clashforge_saved_armies", JSON.stringify(updated));
+    setArmyNameInput("");
+  };
+
+  const handleLoadSavedArmy = (army: SavedArmy) => {
+    setArmyTroops(army.troops);
+    setArmySpells(army.spells);
+    setArmyCcTroops(army.ccTroops);
+    setArmyCcSpells(army.ccSpells);
+    setSelectedHeroes(army.heroes);
+    setSelectedArmy(null);
+  };
+
+  const handleDeleteSavedArmy = (id: string) => {
+    const updated = savedArmies.filter(a => a.id !== id);
+    setSavedArmies(updated);
+    localStorage.setItem("clashforge_saved_armies", JSON.stringify(updated));
+  };
+
+  const handleShareArmy = () => {
+    const dataToShare = {
+      troops: armyTroops,
+      spells: armySpells,
+      ccTroops: armyCcTroops,
+      ccSpells: armyCcSpells,
+      heroes: selectedHeroes
+    };
+    const encoded = btoa(JSON.stringify(dataToShare));
+    const url = new URL(window.location.href);
+    url.searchParams.set('shared_army', encoded);
+    
+    navigator.clipboard.writeText(url.toString());
+    setShareCopied(true);
+    setTimeout(() => setShareCopied(false), 2000);
   };
 
   const getImageUrl = (name: string) => `/api/image-proxy?name=${encodeURIComponent(name)}`;
@@ -263,16 +357,125 @@ export function ArmyBuilder({ profile }: ArmyBuilderProps) {
         )}
       </div>
 
+      {/* Saved Armies Section */}
+      {isClient && savedArmies.length > 0 && (
+        <div className="space-y-4 pt-4 border-t border-border/20">
+          <h3 className="text-xl font-bold flex items-center gap-2 text-chart-3">
+            <Save className="w-5 h-5" /> Your Saved Armies
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {savedArmies.map(army => (
+              <div 
+                key={army.id} 
+                className="glass p-4 rounded-2xl border border-border/50 hover:border-chart-3/50 transition-all flex flex-col justify-between"
+              >
+                <div>
+                  <div className="font-bold text-lg mb-1 text-foreground flex items-center justify-between">
+                    {army.name}
+                    <span className="text-xs bg-background/50 px-2 py-0.5 rounded text-muted-foreground border border-border">TH{army.thLevel}</span>
+                  </div>
+                  
+                  <div className="flex gap-2 flex-wrap my-3">
+                    {Object.entries(army.troops).map(([name, count]) => (
+                      <div key={`s_t_${name}`} className="flex items-center gap-1 bg-background/50 px-2 py-1 rounded-md text-xs font-semibold border border-border/30">
+                        <img src={getImageUrl(name)} className="w-4 h-4 object-contain" /> {count}
+                      </div>
+                    ))}
+                    {Object.entries(army.spells).map(([name, count]) => (
+                      <div key={`s_s_${name}`} className="flex items-center gap-1 bg-background/50 px-2 py-1 rounded-md text-xs font-semibold border border-border/30">
+                        <img src={getImageUrl(name)} className="w-4 h-4 object-contain" /> {count}
+                      </div>
+                    ))}
+                  </div>
+
+                  {(Object.keys(army.ccTroops).length > 0 || Object.keys(army.ccSpells).length > 0) ? (
+                    <div className="flex gap-2 flex-wrap items-center pt-2 border-t border-border/50">
+                      <Castle className="w-3.5 h-3.5 text-chart-2" />
+                      {Object.entries(army.ccTroops).map(([name, count]) => (
+                        <div key={`s_cc_t_${name}`} className="flex items-center gap-1 bg-chart-2/10 text-chart-2 px-1.5 py-0.5 rounded text-[10px] font-semibold border border-chart-2/20">
+                          <img src={getImageUrl(name)} className="w-3 h-3 object-contain" /> {count}
+                        </div>
+                      ))}
+                      {Object.entries(army.ccSpells).map(([name, count]) => (
+                        <div key={`s_cc_s_${name}`} className="flex items-center gap-1 bg-chart-2/10 text-chart-2 px-1.5 py-0.5 rounded text-[10px] font-semibold border border-chart-2/20">
+                          <img src={getImageUrl(name)} className="w-3 h-3 object-contain" /> {count}
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+
+                  {Object.keys(army.heroes || {}).length > 0 ? (
+                    <div className="flex gap-2 flex-wrap items-center pt-2 border-t border-border/50 mt-2">
+                      {Object.entries(army.heroes).map(([name, equips]) => (
+                        <div key={`s_h_${name}`} className="flex items-center gap-1 bg-primary/10 text-primary px-1.5 py-0.5 rounded text-[10px] font-semibold border border-primary/20">
+                          <img src={getImageUrl(name)} className="w-3 h-3 object-contain" /> 
+                          {equips.map(eq => (
+                            <img key={eq} src={getImageUrl(eq)} title={eq} className="w-3 h-3 object-contain ml-0.5" />
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-border/30">
+                  <button 
+                    onClick={() => handleDeleteSavedArmy(army.id)}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded text-xs font-semibold bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+                  >
+                    <Trash2 className="w-3 h-3" /> Delete
+                  </button>
+                  <button 
+                    onClick={() => handleLoadSavedArmy(army)}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded text-xs font-bold bg-chart-3/10 text-chart-3 border border-chart-3/20 hover:bg-chart-3/20 transition-colors"
+                  >
+                    <Download className="w-3 h-3" /> Load Army
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Builder Status Bars */}
-      <div className="glass p-6 rounded-2xl border border-border/50 sticky top-4 z-10 backdrop-blur-xl shadow-lg">
-        <div className="flex justify-between items-center mb-4">
+      <div className="glass p-6 rounded-2xl border border-border/50 sticky top-4 z-40 backdrop-blur-xl shadow-lg">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
           <h3 className="font-bold text-lg">Current Army</h3>
-          <button 
-            onClick={clearArmy}
-            className="flex items-center gap-1 text-xs text-destructive hover:bg-destructive/10 px-2 py-1 rounded transition-colors"
-          >
-            <Trash2 className="w-3 h-3" /> Clear All
-          </button>
+          
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center bg-background/50 rounded-lg border border-border/50 overflow-hidden">
+              <input 
+                type="text" 
+                placeholder="Name your army..." 
+                value={armyNameInput}
+                onChange={e => setArmyNameInput(e.target.value)}
+                className="bg-transparent text-sm px-3 py-1.5 w-32 sm:w-40 focus:outline-none"
+              />
+              <button 
+                onClick={handleSaveArmy}
+                disabled={!armyNameInput.trim()}
+                className="px-3 py-1.5 bg-chart-3/10 text-chart-3 hover:bg-chart-3/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs font-bold border-l border-border/50 flex items-center gap-1"
+              >
+                <Save className="w-3.5 h-3.5" /> Save
+              </button>
+            </div>
+            
+            <button 
+              onClick={handleShareArmy}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${shareCopied ? 'bg-green-500/20 text-green-500 border border-green-500/30' : 'bg-primary text-primary-foreground hover:brightness-110'}`}
+            >
+              {shareCopied ? <Check className="w-3.5 h-3.5" /> : <Share2 className="w-3.5 h-3.5" />}
+              {shareCopied ? "Copied!" : "Share Link"}
+            </button>
+
+            <button 
+              onClick={clearArmy}
+              className="flex items-center gap-1 text-xs text-destructive bg-destructive/10 hover:bg-destructive/20 border border-destructive/20 px-3 py-1.5 rounded-lg transition-colors ml-auto sm:ml-2"
+            >
+              <Trash2 className="w-3.5 h-3.5" /> Clear
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
