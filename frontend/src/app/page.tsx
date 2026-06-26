@@ -3,7 +3,7 @@
 import { Swords, ArrowRight, Shield, Zap, ChevronDown, Sword, Flame, ShieldAlert, Dog, FlaskConical, Crown, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { CLASH_DATA, CategoryKey } from "@/lib/clash-data";
+import { CLASH_DATA, CLASH_DESCRIPTIONS, CategoryKey } from "@/lib/clash-data";
 
 const CATEGORY_CONFIG: Record<CategoryKey, { label: string; icon: React.ReactNode }> = {
   heroes: { label: "Heroes", icon: <Crown className="w-4 h-4" /> },
@@ -178,7 +178,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-2xl font-bold tracking-tight mb-2">{selectedItem}</h3>
               <p className="text-sm text-muted-foreground">
-                Clash of Clans Unit
+                {CLASH_DESCRIPTIONS[selectedItem] || "A powerful unit in the Clash of Clans universe."}
               </p>
             </div>
           </div>
