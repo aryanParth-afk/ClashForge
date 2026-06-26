@@ -8,52 +8,42 @@ export async function GET(request: Request) {
     return new NextResponse('Missing name', { status: 400 });
   }
 
-  // Common Fandom format
   const formatted = name.replace(/ /g, '_');
-  const targetUrl = `https://clashofclans.fandom.com/wiki/Special:FilePath/${formatted}.png`;
+  
+  // Potential Fandom filenames for Clash of Clans units
+  const tryUrls = [
+    `https://clashofclans.fandom.com/wiki/Special:FilePath/${formatted}.png`,
+    `https://clashofclans.fandom.com/wiki/Special:FilePath/${formatted}_info.png`,
+    `https://clashofclans.fandom.com/wiki/Special:FilePath/Avatar_${formatted}.png`,
+    `https://clashofclans.fandom.com/wiki/Special:FilePath/${formatted}_1.png`
+  ];
 
-  try {
-    const res = await fetch(targetUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/121.0.0.0 Safari/537.36',
-        'Referer': 'https://clashofclans.fandom.com/'
-      },
-      redirect: 'follow'
-    });
+  for (const url of tryUrls) {
+    try {
+      const res = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/121.0.0.0 Safari/537.36',
+          'Referer': 'https://clashofclans.fandom.com/'
+        },
+        redirect: 'follow'
+      });
 
-    if (!res.ok) {
-        // Some troops might use _info.png
-        const fallbackUrl = `https://clashofclans.fandom.com/wiki/Special:FilePath/${formatted}_info.png`;
-        const res2 = await fetch(fallbackUrl, {
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/121.0.0.0 Safari/537.36',
-              'Referer': 'https://clashofclans.fandom.com/'
-            },
-            redirect: 'follow'
-        });
-
-        if (!res2.ok) {
-            return new NextResponse('Image not found', { status: 404 });
-        }
-        
-        const buffer = await res2.arrayBuffer();
+      const contentType = res.headers.get('content-type') || '';
+      
+      // Fandom sometimes returns a 200 OK generic HTML page instead of an image
+      if (res.ok && contentType.includes('image')) {
+        const buffer = await res.arrayBuffer();
         return new NextResponse(buffer, {
-            headers: {
-              'Content-Type': res2.headers.get('Content-Type') || 'image/png',
-              'Cache-Control': 'public, max-age=31536000, immutable',
-            },
+          headers: {
+            'Content-Type': contentType,
+            'Cache-Control': 'public, max-age=31536000, immutable',
+          },
         });
+      }
+    } catch (e) {
+      // Ignore network errors on individual URLs and continue
     }
-
-    const buffer = await res.arrayBuffer();
-    return new NextResponse(buffer, {
-      headers: {
-        'Content-Type': res.headers.get('Content-Type') || 'image/png',
-        'Cache-Control': 'public, max-age=31536000, immutable',
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    return new NextResponse('Error fetching image', { status: 500 });
   }
+
+  return new NextResponse('Image not found', { status: 404 });
 }
