@@ -138,7 +138,10 @@ export default function HomePage() {
                     <div className="overflow-hidden">
                       <div className="p-6 bg-background/20 border-t border-border/30 rounded-b-2xl">
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                          {CLASH_DATA[key].map((item, i) => (
+                          {(Array.isArray(CLASH_DATA[key]) 
+                            ? CLASH_DATA[key] as string[] 
+                            : Object.values(CLASH_DATA[key]).flat() as string[]
+                          ).map((item, i) => (
                             <button 
                               key={i} 
                               onClick={() => setSelectedItem(item)}
