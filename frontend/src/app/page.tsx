@@ -1,6 +1,6 @@
 "use client";
 
-import { Swords, ArrowRight, Shield, Zap, ChevronDown, Sword, Flame, ShieldAlert, Dog, FlaskConical, Crown, X } from "lucide-react";
+import { Swords, ArrowRight, Shield, Zap, ChevronDown, Sword, Flame, ShieldAlert, Dog, FlaskConical, Crown, X, Home } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { CLASH_DATA, CLASH_DESCRIPTIONS, CategoryKey } from "@/lib/clash-data";
@@ -14,7 +14,8 @@ const CATEGORY_CONFIG: Record<CategoryKey, { label: string; icon: React.ReactNod
   capital_troops: { label: "Capital Troops", icon: <Shield className="w-4 h-4" /> },
   siege_machines: { label: "Siege Machines", icon: <ShieldAlert className="w-4 h-4" /> },
   pets: { label: "Pets", icon: <Dog className="w-4 h-4" /> },
-  spells: { label: "Spells", icon: <FlaskConical className="w-4 h-4" /> }
+  spells: { label: "Spells", icon: <FlaskConical className="w-4 h-4" /> },
+  buildings: { label: "Buildings", icon: <Home className="w-4 h-4" /> }
 };
 
 function getUnitImageUrl(name: string) {
