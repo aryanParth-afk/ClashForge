@@ -69,8 +69,19 @@ export function BuildingTracker({ profile }: BuildingTrackerProps) {
                   <div className="absolute inset-0 bg-primary/5 pointer-events-none" />
                 )}
                 
-                <div className="relative w-16 h-16 mb-2 mt-2">
-                  <img src={getImageUrl(building)} alt={building} className={`w-full h-full object-contain drop-shadow-md transition-transform ${isMaxed ? 'scale-105' : 'group-hover:scale-110'}`} />
+                <div className="relative w-16 h-16 mb-2 mt-2 flex items-center justify-center">
+                  <img 
+                    src={getImageUrl(building)} 
+                    alt={building} 
+                    className={`w-full h-full object-contain drop-shadow-md transition-transform ${isMaxed ? 'scale-105' : 'group-hover:scale-110'}`} 
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.parentElement?.classList.add('bg-muted/20', 'rounded-xl', 'border', 'border-border/50');
+                      const icon = document.createElement('div');
+                      icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/></svg>`;
+                      e.currentTarget.parentElement?.appendChild(icon.firstChild as Node);
+                    }}
+                  />
                   
                   <div className={`absolute -top-3 -right-3 text-xs font-bold px-2 py-0.5 flex items-center justify-center rounded-full shadow-lg ${isMaxed ? 'bg-primary text-primary-foreground' : 'bg-background border border-border text-foreground'}`}>
                     {count} <span className={`text-[10px] ml-0.5 ${isMaxed ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>/ {maxAllowed}</span>

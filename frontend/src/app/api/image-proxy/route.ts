@@ -26,11 +26,25 @@ export async function GET(request: Request) {
     // Direct Fandom Static CDN (Bypasses Cloudflare)
     getFandomUrl(`Avatar_${formatted}.png`),
     getFandomUrl(`${formatted}.png`),
-    getFandomUrl(`${formatted}_info.png`),
+    getFandomUrl(`${formatted}22.png`),
+    getFandomUrl(`${formatted}21.png`),
+    getFandomUrl(`${formatted}20.png`),
+    getFandomUrl(`${formatted}15.png`),
+    getFandomUrl(`${formatted}10.png`),
+    getFandomUrl(`${formatted}9.png`),
+    getFandomUrl(`${formatted}5.png`),
+    getFandomUrl(`${formatted}1.png`),
     getFandomUrl(`${formatted}_1.png`),
+    getFandomUrl(`${formatted}_info.png`),
+    getFandomUrl(`${formatted}_Icon.png`),
     
     // Original Fandom API Fallbacks
     `https://clashofclans.fandom.com/wiki/Special:FilePath/${formatted}.png`,
+    `https://clashofclans.fandom.com/wiki/Special:FilePath/${formatted}21.png`,
+    `https://clashofclans.fandom.com/wiki/Special:FilePath/${formatted}15.png`,
+    `https://clashofclans.fandom.com/wiki/Special:FilePath/${formatted}10.png`,
+    `https://clashofclans.fandom.com/wiki/Special:FilePath/${formatted}9.png`,
+    `https://clashofclans.fandom.com/wiki/Special:FilePath/${formatted}1.png`,
     `https://clashofclans.fandom.com/wiki/Special:FilePath/${formatted}_info.png`,
     `https://clashofclans.fandom.com/wiki/Special:FilePath/Avatar_${formatted}.png`
   ];
