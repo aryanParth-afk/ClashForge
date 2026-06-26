@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import Link from "next/link";
 import {
   Users,
   Search,
@@ -14,6 +15,9 @@ import {
   RefreshCw,
   Circle,
   Clock,
+  ArrowUp,
+  ArrowDown,
+  Flame,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -70,6 +74,8 @@ function formatTime(date: Date): string {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
+type SortKey = 'role' | 'expLevel' | 'trophies' | 'donations' | 'donationsReceived';
+
 export default function ClanPage() {
   const [tagInput, setTagInput] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
@@ -79,6 +85,7 @@ export default function ClanPage() {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [secondsUntilRefresh, setSecondsUntilRefresh] = useState(AUTO_REFRESH_INTERVAL / 1000);
+  const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: 'asc' | 'desc' } | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -178,6 +185,46 @@ export default function ClanPage() {
   }
 
   const clan = result?.data;
+
+  const sortedMembers = useMemo(() => {
+    if (!clan?.memberList) return [];
+    
+    let sortableItems = [...clan.memberList];
+    if (sortConfig !== null) {
+      sortableItems.sort((a, b) => {
+        let aValue: any = a[sortConfig.key];
+        let bValue: any = b[sortConfig.key];
+        
+        if (sortConfig.key === 'role') {
+            const roleOrder = { leader: 4, coLeader: 3, admin: 2, member: 1 };
+            aValue = roleOrder[a.role as keyof typeof roleOrder] || 0;
+            bValue = roleOrder[b.role as keyof typeof roleOrder] || 0;
+        }
+
+        if (aValue < bValue) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return sortableItems;
+  }, [clan, sortConfig]);
+
+  const requestSort = (key: SortKey) => {
+    let direction: 'asc' | 'desc' = 'desc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'desc') {
+      direction = 'asc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortIcon = (key: SortKey) => {
+    if (sortConfig?.key !== key) return <ArrowDown className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity" />;
+    return sortConfig.direction === 'asc' ? <ArrowUp className="h-3 w-3 text-primary" /> : <ArrowDown className="h-3 w-3 text-primary" />;
+  };
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
@@ -340,8 +387,7 @@ export default function ClanPage() {
             )}
           </div>
 
-          {/* ── Stats grid ── */}
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
             <StatCard
               label="Level"
               value={clan.clanLevel}
@@ -353,14 +399,24 @@ export default function ClanPage() {
               icon={<Trophy className="h-4 w-4 text-chart-4" />}
             />
             <StatCard
+              label="Capital Points"
+              value={clan.clanCapitalPoints?.toLocaleString() ?? "—"}
+              icon={<Medal className="h-4 w-4 text-chart-3" />}
+            />
+            <StatCard
               label="War Wins"
               value={clan.warWins ?? "—"}
               icon={<Swords className="h-4 w-4 text-chart-5" />}
             />
             <StatCard
+              label="Win Streak"
+              value={clan.warWinStreak ?? "—"}
+              icon={<Flame className="h-4 w-4 text-chart-1" />}
+            />
+            <StatCard
               label="Members"
               value={`${clan.members}/50`}
-              icon={<Users className="h-4 w-4 text-chart-1" />}
+              icon={<Users className="h-4 w-4 text-primary" />}
             />
           </div>
 
@@ -381,31 +437,41 @@ export default function ClanPage() {
                     <tr className="border-b border-border text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                       <th className="px-5 py-3">#</th>
                       <th className="px-5 py-3">Player</th>
-                      <th className="px-5 py-3">Role</th>
-                      <th className="px-5 py-3 text-center">Level</th>
-                      <th className="px-5 py-3 text-right">Trophies</th>
-                      <th className="px-5 py-3 text-right">Donated</th>
-                      <th className="px-5 py-3 text-right">Received</th>
+                      <th className="px-5 py-3 cursor-pointer group hover:text-foreground transition-colors" onClick={() => requestSort('role')}>
+                        <div className="flex items-center gap-1">Role {getSortIcon('role')}</div>
+                      </th>
+                      <th className="px-5 py-3 text-center cursor-pointer group hover:text-foreground transition-colors" onClick={() => requestSort('expLevel')}>
+                        <div className="flex items-center justify-center gap-1">Level {getSortIcon('expLevel')}</div>
+                      </th>
+                      <th className="px-5 py-3 text-right cursor-pointer group hover:text-foreground transition-colors" onClick={() => requestSort('trophies')}>
+                        <div className="flex items-center justify-end gap-1">Trophies {getSortIcon('trophies')}</div>
+                      </th>
+                      <th className="px-5 py-3 text-right cursor-pointer group hover:text-foreground transition-colors" onClick={() => requestSort('donations')}>
+                        <div className="flex items-center justify-end gap-1">Donated {getSortIcon('donations')}</div>
+                      </th>
+                      <th className="px-5 py-3 text-right cursor-pointer group hover:text-foreground transition-colors" onClick={() => requestSort('donationsReceived')}>
+                        <div className="flex items-center justify-end gap-1">Received {getSortIcon('donationsReceived')}</div>
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {clan.memberList.map((m, i) => {
+                    {sortedMembers.map((m, i) => {
                       const role = getRoleConfig(m.role);
                       return (
                         <tr
                           key={m.tag}
-                          className="transition-colors hover:bg-accent/40"
+                          className="transition-colors hover:bg-accent/40 group"
                         >
                           <td className="px-5 py-3 text-xs text-muted-foreground">
                             {i + 1}
                           </td>
                           <td className="px-5 py-3">
-                            <div>
+                            <Link href={`/player?tag=${encodeURIComponent(m.tag.replace('#', ''))}`} className="group-hover:text-primary transition-colors flex items-center">
                               <span className="font-medium">{m.name}</span>
                               <span className="ml-2 text-xs font-mono text-muted-foreground">
                                 {m.tag}
                               </span>
-                            </div>
+                            </Link>
                           </td>
                           <td className="px-5 py-3">
                             <span
