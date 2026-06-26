@@ -15,8 +15,8 @@ interface ArmyBuilderProps {
 }
 
 export function ArmyBuilder({ profile }: ArmyBuilderProps) {
-  const thLevel = profile.townHallLevel;
-  const capacity = TH_CAPACITIES[thLevel] || { camp: 0, spell: 0, cc: 0 };
+  const thLevel = profile.townHallLevel || 1;
+  const capacity = TH_CAPACITIES[thLevel] || { camp: 320, spell: 11, cc: 50 };
   
   const [selectedArmy, setSelectedArmy] = useState<string | null>(null);
   const [armyTroops, setArmyTroops] = useState<Record<string, number>>({});

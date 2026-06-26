@@ -217,6 +217,12 @@ export interface THCapacity {
 
 // Map TH level to capacities
 export const TH_CAPACITIES: Record<number, THCapacity> = {
+  1: { camp: 20, spell: 0, cc: 0 },
+  2: { camp: 30, spell: 0, cc: 10 },
+  3: { camp: 70, spell: 0, cc: 10 },
+  4: { camp: 80, spell: 0, cc: 15 },
+  5: { camp: 135, spell: 1, cc: 15 },
+  6: { camp: 150, spell: 2, cc: 20 },
   7: { camp: 200, spell: 6, cc: 20 },
   8: { camp: 200, spell: 7, cc: 25 },
   9: { camp: 220, spell: 9, cc: 30 },
@@ -226,7 +232,9 @@ export const TH_CAPACITIES: Record<number, THCapacity> = {
   13: { camp: 300, spell: 11, cc: 45 },
   14: { camp: 300, spell: 11, cc: 50 },
   15: { camp: 320, spell: 11, cc: 50 },
-  16: { camp: 320, spell: 11, cc: 50 }
+  16: { camp: 320, spell: 11, cc: 50 },
+  17: { camp: 340, spell: 13, cc: 55 },
+  18: { camp: 360, spell: 15, cc: 60 }
 };
 
 export interface MetaArmy {
