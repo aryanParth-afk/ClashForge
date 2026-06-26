@@ -1,30 +1,49 @@
--- ClashForge PostgreSQL Schema (Supabase Optimized)
+-- Backend Schema & Data Architecture
+-- Project Name: ClashForge
 
--- Enable UUID extension (Supabase usually has this on by default)
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- NOTE: ClashForge relies heavily on the official Supercell REST API.
+-- The backend (FastAPI) primarily acts as a secure proxy and data formatter.
+-- Persistent user data (like Saved Armies and Building Tracker progress) is intentionally 
+-- stored entirely in the frontend using `localStorage` to provide a blazing-fast, serverless experience.
 
--- Core table to cache clan details and minimize external API calls
-CREATE TABLE clan_cache (
-    clan_tag VARCHAR(20) PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
+-- 1. CLANS CACHE (If Supabase is integrated for rate-limiting)
+CREATE TABLE clans (
+    tag VARCHAR(20) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
     level INT,
     points INT,
-    versus_points INT,
-    member_count INT,
-    raw_data JSONB NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    members_count INT,
+    last_synced TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    raw_json JSONB -- Stores the exact Supercell API response for instant retrieval
 );
 
--- Table to store village upgrade profiles
-CREATE TABLE user_profiles (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    player_tag VARCHAR(20) UNIQUE,
-    player_name VARCHAR(100),
-    town_hall_level INT NOT NULL,
-    raw_village_json JSONB NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+-- 2. CLIENT-SIDE DATA STRUCTURES (Stored in browser localStorage)
 
--- Index for faster cache invalidation queries
-CREATE INDEX idx_clan_cache_updated_at ON clan_cache(updated_at);
+/*
+Army Builder Compositions
+Key: clashforge_armies
+Structure: Array of Army Objects
+[
+  {
+    "id": "uuid-1234",
+    "name": "Queen Charge LaLo",
+    "composition": {
+      "troops": { "Balloon": 15, "Lava Hound": 2 },
+      "spells": { "Rage Spell": 3 },
+      "heroes": { "Archer Queen": 1 }
+    }
+  }
+]
+*/
+
+/*
+Building Tracker Progress
+Key: clashforge_buildings_{playerTag}
+Structure: Object mapping Building Name to Current Maxed Count
+{
+  "Cannon": 7,
+  "Archer Tower": 5,
+  "Monolith": 1,
+  "Eagle Artillery": 1
+}
+*/

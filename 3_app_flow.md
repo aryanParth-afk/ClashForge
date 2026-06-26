@@ -4,23 +4,31 @@
 ### High-Level Architecture Flow
 [ Landing Page ] 
        |
-       +---> Option A: Enter Clan Tag ---> [ Fetch API via Backend ] ---> [ Clan Dashboard ]
+       +---> Option A: Search Clan ---> [ Fetch API via Backend ] ---> [ Clan Dashboard ]
        |                                                                          |
-       |                                                                          +---> Members Table
-       |                                                                          +---> War Analytics
+       |                                                                          +---> Roster Table with Sort
+       |                                                                          +---> Player Analyzer Link
        |
-       +---> Option B: Paste Village JSON -> [ Python Parse Engine ] ----> [ Upgrade Planner ]
-                                                                                  |
-                                                                                  +---> Resource Calc
-                                                                                  +---> Builder Timeline
+       +---> Option B: Search Player -> [ Fetch API via Backend ] ----> [ Player Analyzer ]
+       |                                                                          |
+       |                                                                          +---> Heroes & Equipment
+       |                                                                          +---> Lab Troops / Spells
+       |                                                                          +---> Smart Building Tracker (Local Storage)
+       |
+       +---> Global Nav: Army Builder -> [ Interactive UI Studio ] ---> [ Saved Armies (Local Storage) ]
 
 ### Step-by-Step User Journey
-1. **Entrypoint:** User arrives at a clean, modern homepage with two clear paths: "Analyze Clan" or "Optimize Village".
+1. **Entrypoint:** User arrives at a clean, modern homepage with clear navigation for Clan Search, Player Search, and Army Builder.
 2. **Path A (Clan Lookup):** 
-   - User inputs clan tag (e.g., `#2PPG28RQP`). 
-   - Frontend sends a request to `/api/v1/clan/{tag}`. 
-   - Backend validates the tag, checks the Supabase cache, hits the Supercell API if needed, formats the JSON response, and serves the dashboard.
-3. **Path B (Village Parsing):** 
-   - User copies their village layout JSON string from the in-game export tool and pastes it into an optimized code-editor-style field. 
-   - Frontend instantly validates the JSON formatting before sending it to the FastAPI backend.
-   - Backend decodes the `dataId` fields, matches them against max level requirements, and returns a prioritized array of upgrades.
+   - User inputs clan tag (e.g., `#2YPQ0PGLY`). 
+   - Frontend routes to `/clan` and fetches Supercell API metadata. 
+   - Roster is sortable, and clicking a member routes instantly to their Player Analyzer.
+3. **Path B (Player Analyzer):** 
+   - User inputs player tag. 
+   - User views a heavily visual grid of the player's Troops, Spells, and Heroes. 
+   - User clicks the **Buildings** tab to manually tick off their upgraded buildings, constrained strictly by their Town Hall maximums.
+4. **Path C (Army Builder):**
+   - Accessible via the top Nav bar.
+   - User drags and drops (or clicks to add) troops, spells, and heroes into a composition.
+   - Resource costs and housing spaces are tracked.
+   - User types a name and clicks "Save" to push the army into their persistent `localStorage` cache for later viewing.
