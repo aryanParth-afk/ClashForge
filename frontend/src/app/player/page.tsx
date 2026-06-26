@@ -350,8 +350,8 @@ export default function PlayerPage() {
                           {activeTab === "heroes" && (
                             <td className="px-6 py-4">
                               <div className="flex gap-2 flex-wrap">
-                                {("equipment" in item && item.equipment && item.equipment.length > 0) ? (
-                                  item.equipment.map((eq, j) => (
+                                {((item as any).equipment?.length > 0) ? (
+                                  (item as any).equipment.map((eq: any, j: number) => (
                                     <span key={j} className="inline-flex items-center gap-1.5 rounded-md bg-background/60 border border-border/60 px-2.5 py-1 text-xs font-medium text-muted-foreground shadow-sm">
                                       <span className="text-foreground">{eq.name}</span>
                                       <span className={eq.level === eq.maxLevel ? "text-chart-3" : "text-primary/70"}>
