@@ -123,7 +123,206 @@ export const CLASH_DESCRIPTIONS: Record<string, string> = {
   "Frosty": "A chilly friend that throws frostmites to slow down enemy defenses.",
   "Diggy": "A tunneling pet that stuns the target its Hero is attacking.",
   "Poison Lizard": "A toxic reptile that spits fast-acting poison at defending Heroes and troops.",
-  "Phoenix": "Rises from the ashes to revive its Hero with a burst of invulnerability."
+  "Phoenix": "Rises from the ashes to revive its Hero with a burst of invulnerability.",
+  "Spirit Fox": "A mystical companion that can turn itself and its Hero invisible to sneak past defenses.",
+  "Angry Jelly": "A furious floating blob that amplifies its Hero's attacks but explodes in a sticky mess.",
+  "Sneezy": "A congested companion whose powerful sneezes create gusts of wind that blow back enemies.",
+  "Greedy Raven": "Always on the hunt for loot, this raven swoops down to snatch extra resources during battles.",
+
+  // Custom/New Elixir Troops
+  "Thrower": "A relentless troop equipped with a massive arm designed to hurl heavy projectiles over walls.",
+  "Meteor Golem": "A flaming beast of molten rock that leaves a trail of fire and crushes defenses on impact.",
+
+  // Custom/New Dark Troops
+  "Furnace": "A walking cauldron of dark elixir that constantly spawns fiery spirits to overwhelm the enemy.",
+  "Ruin Witch": "A dark sorceress who summons corrupted skeletons and curses enemy buildings to take more damage.",
+
+  // Custom/New Siege Machines
+  "Sky Wagon": "An aerial siege machine that drops a payload of devastating bombs before deploying Clan Castle troops.",
+  "Troop Launcher": "A powerful contraption that literally fires your Clan Castle troops deep into the enemy base.",
+
+  // Builder Troops
+  "Raged Barbarian": "Starts off with a burst of furious rage, dealing massive damage and moving incredibly fast.",
+  "Sneaky Archer": "Cloaked in a stealthy cape, she remains completely invisible to defenses for her first few attacks.",
+  "Boxer Giant": "A heavyweight brawler whose first attack packs an unbelievable punch that shatters defenses.",
+  "Beta Minion": "A genetically modified minion whose initial attacks strike from a longer, safer distance.",
+  "Bomber": "Throws massive bouncing bombs that blow through multiple layers of walls with ease.",
+  "Cannon Cart": "A cannon on wheels! Once destroyed, it transforms into a stationary turret for a final stand.",
+  "Night Witch": "Summons swarms of flying bats to swarm defenses and bursts into a flock of bats when defeated.",
+  "Drop Ship": "A skeletal hot air balloon that drops devastating skeletons right on top of enemy defenses.",
+  "Power P.E.K.K.A": "Charged with volatile energy, her attacks unleash an overcharged blast that damages everything nearby.",
+  "Hog Glider": "Swoops in over walls and stuns the first defense he hits before his hog takes over on the ground.",
+  "Electrofire Wizard": "A master of dual elements who can switch between chaining electricity and a scorching inferno beam.",
+
+  // Capital Troops
+  "Battle Ram": "Four barbarians carrying a heavy log. They charge at the nearest wall and smash it to pieces!",
+  "Minion Horde": "A massive swarm of flying Minions that can quickly overwhelm single-target air defenses.",
+  "Flying Machine": "A rickety flying contraption that pelts ground defenses with a continuous barrage of attacks.",
+  "Skeleton Barrel": "A balloon filled to the brim with skeletons. Once it pops, a massive skeletal army drops out.",
+  "Mountain Golem": "An absolute behemoth of stone that crushes walls by simply walking over them.",
+  "Mega Sparky": "A terrifyingly huge machine that charges up a massive blast of electricity to vaporize defenses.",
+  "Hog Raider": "A specialized Hog Rider deployed in the Capital, expertly vaulting over massive walls.",
+
+  // Spells
+  "Lightning Spell": "Electrocute your enemies! Drop this spell to damage buildings and units in a concentrated area.",
+  "Healing Spell": "Heal your troops to keep them in the fight! Cast this spell to create a Ring of Healing.",
+  "Rage Spell": "Enrage your units to make them bigger, faster and stronger! Cast this to create a Ring of Rage.",
+  "Jump Spell": "Walls slowing you down? Cast this spell to let your troops jump right over them!",
+  "Freeze Spell": "When the heat is on, cast a Freeze Spell! It temporarily disables enemy defenses and troops.",
+  "Clone Spell": "Turn this spell into a pop-up army! It spawns temporary copies of any troops that enter it.",
+  "Invisibility Spell": "Hide your troops from enemy fire! Everything inside the ring becomes invisible and untargetable.",
+  "Recall Spell": "Made a mistake? Use this spell to pull troops out of the battle so they can be redeployed elsewhere.",
+  "Revive Spell": "Breathes new life into fallen troops, giving them a second chance to fight.",
+  "Poison Spell": "Give your enemy's troops a toxic surprise! It damages and slows down defending Clan Castle troops.",
+  "Earthquake Spell": "Shake the ground! It deals massive percentage damage to buildings and destroys walls instantly.",
+  "Haste Spell": "Put some hustle in even your heaviest units! It boosts movement speed without the damage boost of Rage.",
+  "Skeleton Spell": "Summon a surprise army of Skeletons anywhere on the battlefield!",
+  "Bat Spell": "Summon an army of bats! They will seek out and distract or destroy enemy defenses.",
+  "Overgrowth Spell": "Causes massive, thick roots to temporarily entangle and disable enemy defenses.",
+  "Totem Spell": "Summons a magical totem that provides a defensive aura to your troops.",
+  "Ice Block Spell": "Encases your troops in a protective block of ice, shielding them from fatal damage."
 };
+
+export const TROOP_HOUSING_SPACE: Record<string, number> = {
+  // Elixir Troops
+  "Barbarian": 1, "Archer": 1, "Goblin": 1, "Giant": 5, "Wall Breaker": 2, "Balloon": 5,
+  "Wizard": 4, "Healer": 14, "Dragon": 20, "P.E.K.K.A": 25, "Baby Dragon": 10, "Miner": 6,
+  "Electro Dragon": 30, "Yeti": 18, "Dragon Rider": 25, "Electro Titan": 32, "Root Rider": 20,
+  "Thrower": 15, "Meteor Golem": 35, // custom 
+
+  // Dark Troops
+  "Minion": 2, "Hog Rider": 5, "Valkyrie": 8, "Golem": 30, "Witch": 12, "Lava Hound": 30,
+  "Bowler": 6, "Ice Golem": 15, "Headhunter": 6, "Apprentice Warden": 20, "Druid": 14,
+  "Furnace": 20, "Ruin Witch": 15, // custom
+
+  // Super Troops
+  "Super Barbarian": 5, "Super Archer": 12, "Super Giant": 10, "Sneaky Goblin": 3, "Super Wall Breaker": 8,
+  "Rocket Balloon": 8, "Super Wizard": 10, "Super Dragon": 40, "Inferno Dragon": 15, "Super Minion": 12,
+  "Super Valkyrie": 20, "Super Witch": 40, "Ice Hound": 40, "Super Bowler": 30, "Super Miner": 24,
+  "Super Hog Rider": 12, "Super Yeti": 40
+};
+
+export const SPELL_HOUSING_SPACE: Record<string, number> = {
+  "Lightning Spell": 1, "Healing Spell": 2, "Rage Spell": 2, "Jump Spell": 2,
+  "Freeze Spell": 1, "Clone Spell": 3, "Invisibility Spell": 1, "Recall Spell": 2, "Revive Spell": 2,
+  "Poison Spell": 1, "Earthquake Spell": 1, "Haste Spell": 1, "Skeleton Spell": 1,
+  "Bat Spell": 1, "Overgrowth Spell": 2, "Totem Spell": 2, "Ice Block Spell": 1
+};
+
+export interface THCapacity {
+  camp: number;
+  spell: number;
+  cc: number;
+}
+
+// Map TH level to capacities
+export const TH_CAPACITIES: Record<number, THCapacity> = {
+  7: { camp: 200, spell: 6, cc: 20 },
+  8: { camp: 200, spell: 7, cc: 25 },
+  9: { camp: 220, spell: 9, cc: 30 },
+  10: { camp: 240, spell: 11, cc: 35 },
+  11: { camp: 260, spell: 11, cc: 35 },
+  12: { camp: 280, spell: 11, cc: 40 },
+  13: { camp: 300, spell: 11, cc: 45 },
+  14: { camp: 300, spell: 11, cc: 50 },
+  15: { camp: 320, spell: 11, cc: 50 },
+  16: { camp: 320, spell: 11, cc: 50 }
+};
+
+export interface MetaArmy {
+  id: string;
+  name: string;
+  minTh: number;
+  description: string;
+  troops: { name: string; count: number }[];
+  spells: { name: string; count: number }[];
+}
+
+export const META_ARMIES: MetaArmy[] = [
+  {
+    id: "edrag_spam",
+    name: "Edrag Spam",
+    minTh: 11,
+    description: "A highly popular and easy-to-use air attack. Uses Electro Dragons to chain lightning through clustered bases.",
+    troops: [
+      { name: "Electro Dragon", count: 7 },
+      { name: "Balloon", count: 10 }
+    ],
+    spells: [
+      { name: "Rage Spell", count: 3 },
+      { name: "Freeze Spell", count: 5 }
+    ]
+  },
+  {
+    id: "qc_lalo",
+    name: "Queen Charge LaLo",
+    minTh: 9,
+    description: "A high-skill attack that uses a Queen Charge to take out key defenses, followed by a surgical Lava Hound and Balloon sweep.",
+    troops: [
+      { name: "Healer", count: 5 },
+      { name: "Lava Hound", count: 2 },
+      { name: "Balloon", count: 16 },
+      { name: "Wall Breaker", count: 5 },
+      { name: "Minion", count: 10 }
+    ],
+    spells: [
+      { name: "Rage Spell", count: 2 },
+      { name: "Haste Spell", count: 3 },
+      { name: "Freeze Spell", count: 2 }
+    ]
+  },
+  {
+    id: "gowipe",
+    name: "GoWiPe",
+    minTh: 8,
+    description: "The classic ground smash attack! Uses Golems to tank, while Wizards and P.E.K.K.As destroy the core.",
+    troops: [
+      { name: "Golem", count: 2 },
+      { name: "P.E.K.K.A", count: 3 },
+      { name: "Wizard", count: 15 },
+      { name: "Wall Breaker", count: 5 }
+    ],
+    spells: [
+      { name: "Healing Spell", count: 1 },
+      { name: "Rage Spell", count: 2 },
+      { name: "Poison Spell", count: 1 }
+    ]
+  },
+  {
+    id: "qc_hybrid",
+    name: "Queen Charge Hybrid",
+    minTh: 10,
+    description: "A devastating combination of Miners and Hog Riders, spearheaded by a Queen Charge to create pathing.",
+    troops: [
+      { name: "Healer", count: 5 },
+      { name: "Miner", count: 14 },
+      { name: "Hog Rider", count: 13 },
+      { name: "Balloon", count: 2 },
+      { name: "Wall Breaker", count: 5 }
+    ],
+    spells: [
+      { name: "Healing Spell", count: 2 },
+      { name: "Rage Spell", count: 2 },
+      { name: "Freeze Spell", count: 1 },
+      { name: "Poison Spell", count: 1 }
+    ]
+  },
+  {
+    id: "zap_witches",
+    name: "Zap Witches",
+    minTh: 10,
+    description: "Uses Lightning Spells and Earthquake to destroy Inferno Towers, allowing Golems and Witches to overwhelm the base with skeletons.",
+    troops: [
+      { name: "Golem", count: 3 },
+      { name: "Witch", count: 12 },
+      { name: "Wall Breaker", count: 3 }
+    ],
+    spells: [
+      { name: "Lightning Spell", count: 8 },
+      { name: "Earthquake Spell", count: 2 },
+      { name: "Freeze Spell", count: 1 }
+    ]
+  }
+];
 
 export type CategoryKey = keyof typeof CLASH_DATA;
